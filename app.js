@@ -57,6 +57,9 @@ console.log('World@War Public Server pré-alpha Started...');
 var SOCKET_LIST = {}; // lista de ligacoes
 var PLAYERS_LIST = {}; // lista de jogadores
 var playerCount = 0;
+var serverDateStart, serverDateNow, serverDateEnd;
+
+serverDateNow=serverDateStart = new Date();
 
 var Player = function (id,name) {
     var self = {
@@ -126,14 +129,21 @@ io.sockets.on('connection', function (socket) {
 
 });
 
+var add_minutes =  function (dt, minutes) {
+    return new Date(dt.getTime() + minutes*60000);
+}
+
 setInterval(function () {
+
+    serverDateNow = add_minutes(serverDateNow,1);
 
         for (var i in SOCKET_LIST) {
             var socket = SOCKET_LIST[i];
             socket.emit('playersCount',{
-                total : playerCount
+                total : playerCount,
+                timestamp : serverDateNow
             });
         }
 
-},1000/25); //40ms
+},60 * 1000); //60s //40ms 1000/25
 

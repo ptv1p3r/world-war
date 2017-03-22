@@ -24,7 +24,7 @@
         FAR = 10000,
         DISTANCIA_MAX = 1000;
     var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
-    var lblPlayersCount, playerLoggedIn = false;
+    var lblPlayersCount, playerLoggedIn = false, serverDateTime;
 
     function init(){
         //SCENE
@@ -141,10 +141,13 @@
         text2.style.left = 800 + 'px';
 
         createLabel("playerCount","playerCount","World@War Server Player's: ",10,20,null);
+        createLabel("serverDateTime","serverDateTime","Server Date/Time: ",10,250,null);
 
         lblPlayersCount = document.createElement('div');
         createLabel("serverPlayersCount","serverPlayersCount","0",10,220,lblPlayersCount);
 
+        serverDateTime = document.createElement('div');
+        createLabel("serverDateTime","serverDateTime","- nenhum -",10,380,serverDateTime);
 
         var btlogin = document.createElement("button");
         var tlogin = document.createTextNode("Login");
@@ -310,6 +313,7 @@
 
     socket.on("playersCount", function (data) {
         lblPlayersCount.innerHTML = data.total;
+        serverDateTime.innerHTML = data.timestamp;
         console.log(data.total);
     });
 
