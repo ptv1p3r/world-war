@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>World@war pré-alpha</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<canvas id="myCanvas"></canvas>
+<script src="js/three.js"></script>
+
+<script>
+    var socket = io();
+    var WIDTH = window.innerWidth,
+        HEIGHT = window.innerHeight-4,
+        VIEW_ANGLE = 45,
+        ASPECT = WIDTH / HEIGHT,
+        NEAR = 0.1,
+        FAR = 10000,
+        DISTANCIA_MAX = 1000;
+    var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
+    var lblPlayersCount, playerLoggedIn = false;
+
+    function init(){
+        //SCENE
+        scene = new THREE.Scene();
+
+        //CAMERA
+        camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+        camera.position.set(0, 100, DISTANCIA_MAX);
+        camera.lookAt(scene.position);
+
+        //RENDERER
+        renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias: true});
+        renderer.setClearColor(0x000000);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(WIDTH, HEIGHT);
+        document.body.appendChild(renderer.domElement);
+
+        //LIGHTS
+        var light = new THREE.AmbientLight(0xffffff, 1.0);
+        scene.add(light);
+
+        var geometry = new THREE.SphereGeometry(175,32,32);
+
+        //var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
+        material = new THREE.MeshPhongMaterial();
+        material.map = THREE.ImageUtils.loadTexture('images/earthmap4k.jpg');            // Diffuse Texture
+        material.bumpMap = THREE.ImageUtils.loadTexture('images/earthbump4k.jpg');       // Bump Texture
+        material.bumpScale = 0.05;
+        material.specularMap = THREE.ImageUtils.loadTexture('images/earthspec4k.jpg');   // Spectacular Texture
+        material.specular = new THREE.Color('grey');
+        earthMesh = new THREE.Mesh(geometry, material);
+
+        var geometry1   = new THREE.SphereGeometry(177, 32, 32);
+        var material1  = new THREE.MeshPhongMaterial({
+            map         : new THREE.ImageUtils.loadTexture('images/earthcloudmap2.jpg'),
+            side        : THREE.DoubleSide,
+            opacity     : 0.3,
+            transparent : true,
+            depthWrite  : false
+        });
+        cloudMesh = new THREE.Mesh(geometry1, material1);
+
+        earthMesh.add(cloudMesh);
+
+
+        // the geometry that will contain all our cubes
+        var geom = new THREE.Geometry();
+        //var geom = new THREE.SphereGeometry(180,32,32);
+        // material to use for each of our elements. Could use a set of materials to
+        // add colors relative to the density. Not done here.
+        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
+        var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
+        var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
+
+        var latlong = {};
+
+        latlong[0] = "40.0#175.0";
+        latlong[1] = "-2.654162#82.699830";
+        latlong[2] = "11.654162#-53.699830";
+
+
+        for (var i = 0 ; i < 1; i++) {
+
+            //get the data, and set the offset, we need to do this since the x,y coordinates
+            //from the data aren't in the correct format
+           // var x = parseInt(data[i][0])+180;
+           // var y = parseInt((data[i][1])-84)*-1;
+           // var value = parseFloat(data[i][2]);
+
+            var d = latlong[i].split("#");
+
+            var position = latLongToVector3(d[0], d[1], 175);
+
+            // create the cube
+            var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
+
+            // position the cube correctly
+            cube.position.set(position.x,position.y,position.z);
+            cube.lookAt( new THREE.Vector3(0,0,0) );
+
+            // merge with main model
+            THREE.GeometryUtils.merge(geom,cube);
+        }
+
+        // create a new mesh, containing all the other meshes.
+        //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
+        var total = new THREE.Mesh(geom,material);
+
+        earthMesh.add(total);
+        //scene.add(total);
+
+        // SKYBOX
+        var geometry2  = new THREE.SphereGeometry(1000, 32, 32);
+        var material2  = new THREE.MeshBasicMaterial({
+            map   : new THREE.ImageUtils.loadTexture('images/skybox1.jpg'),
+            side  : THREE.BackSide
+        });
+        var skyBoxMesh  = new THREE.Mesh(geometry2, material2); // cria mesh com geometria e material
+
+        //earthMesh.add(skyBoxMesh);
+        scene.add(earthMesh);
+        scene.add(skyBoxMesh);
+
+        window.addEventListener( 'resize', onWindowResize, false );
+
+        text2 = document.createElement('div');
+        text2.style.position = 'absolute';
+        //text2.style.zIndex = 1;
+        text2.style.width = 100;
+        text2.style.height = 100;
+        text2.style.backgroundColor = "blue";
+        text2.innerHTML = "yoooo!";
+        text2.style.top = 40 + 'px';
+        text2.style.left = 800 + 'px';
+
+        createLabel("playerCount","playerCount","World@War Server Player's: ",10,20,null);
+
+        lblPlayersCount = document.createElement('div');
+        createLabel("serverPlayersCount","serverPlayersCount","0",10,220,lblPlayersCount);
+
+
+        var btlogin = document.createElement("button");
+        var tlogin = document.createTextNode("Login");
+        btlogin.appendChild(tlogin);
+        btlogin.id = "btlogin";
+        btlogin.style.position = 'absolute';
+        btlogin.style.top = 50 + 'px';
+        btlogin.style.left = 50 + 'px';
+        btlogin.onclick = function () {
+            var txtbox = document.getElementById('loginName');
+
+            if (txtbox.value.length > 0) {
+                var value = txtbox.value;
+
+                socket.emit("newPlayer",{
+                    name : value
+                })
+            }
+
+        };
+
+        createInputField('loginName',50,100);
+
+        text3 = document.createElement('div');
+        text3.style.position = 'absolute';
+        //text2.style.zIndex = 1;
+        text3.style.width = 100;
+        text3.style.height = 100;
+        text3.style.backgroundColor = "transparent";
+        text3.style.color ="red";
+        text3.innerHTML = "OFF";
+        text3.style.top = 12 + 'px';
+        text3.style.left = 880 + 'px';
+
+        // butao city lights
+        var btn = document.createElement("button");
+        var t = document.createTextNode("City Lights");
+        btn.appendChild(t);
+        btn.style.position = 'absolute';
+        btn.style.top = 10 + 'px';
+        btn.style.left = 800 + 'px';
+        btn.onclick = function() {
+
+            if (bolCityLightsON){
+                earthMesh.material.map = THREE.ImageUtils.loadTexture('resources/earthlights1k.jpg');
+                text3.style.color ="lightgreen";
+                text3.innerHTML = "ON";
+            } else {
+                earthMesh.material.map = THREE.ImageUtils.loadTexture('resources/earthmap1k.jpg');
+                text3.style.color ="red";
+                text3.innerHTML = "OFF";
+            }
+
+            bolCityLightsON = !bolCityLightsON;
+
+            //cloudMesh.material.needsUpdate = true;
+            earthMesh.material.needsUpdate = true;
+        };
+
+        document.body.appendChild(btlogin);
+        document.body.appendChild(btn);
+        document.body.appendChild(text2);
+        document.body.appendChild(text3);
+
+
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        if (text2.textContent)
+            text2.textContent = earthMesh.rotation.y;
+        else if (text2.innerText)
+            text2.innerText = earthMesh.rotation.y;
+        else
+            text2.innerHTML = earthMesh.rotation.y;
+
+        earthMesh.rotation.y = Date.now() * -0.001;
+        cloudMesh.rotation.y = Date.now() * -0.00001;
+
+        if (playerLoggedIn){
+            /*var el = document.getElementById('btlogin');
+            el.parentNode.removeChild(el);
+            var el1 = document.getElementById('loginName');
+            el1.parentNode.removeChild(el1);
+*/
+            //var elem = document.getElementById("btlogin");
+            //elem.remove();
+            //elem.visible = false;
+
+
+        }
+
+        render();
+    }
+
+    function render() {
+        renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        render();
+    }
+
+    function createLabel(id, name, text, x, y, object){
+        var label;
+
+        if(object==null){
+            label = document.createElement('div');
+        } else {
+            label=object;
+        }
+
+        //label = document.createElement('div');
+        label.style.position = 'absolute';
+        label.name = name;
+        label.id = id;
+        label.style.width = 100;
+        label.style.height = 100;
+        label.style.backgroundColor = "transparent";
+        label.style.color ="white";
+        label.innerHTML = text;
+        label.style.top = x + 'px';
+        label.style.left = y + 'px';
+
+        document.body.appendChild(label);
+    }
+
+    function createInputField(id, x, y) {
+        var field = document.createElement("INPUT");
+        field.setAttribute("type", "text");
+        field.style.position = 'absolute';
+        field.style.top = x + 'px';
+        field.style.left = y + 'px';
+        field.id = id;
+
+        document.body.appendChild(field);
+    }
+
+    init();
+    animate();
+
+    // convert the positions from a lat, lon to a position on a sphere.
+    function latLongToVector3(lat, lon, radius) {
+       // var phi = (lat)*Math.PI/180;
+       // var theta = (lon-180)*Math.PI/180;
+     /*
+        var x = -(radius+heigth) * Math.cos(phi) * Math.cos(theta);
+        var y = (radius+heigth) * Math.sin(phi);
+        var z = (radius+heigth) * Math.cos(phi) * Math.sin(theta);*/
+
+        var phi   = (90-lat)*(Math.PI/180);
+        var theta = (lon+180)*(Math.PI/180);
+        var x = -((radius ) * Math.sin(phi)*Math.cos(theta));
+        var z = ((radius ) * Math.sin(phi)*Math.sin(theta));
+        var y = ((radius ) * Math.cos(phi));
+
+        return new THREE.Vector3(x,y,z);
+    }
+
+    socket.on("playersCount", function (data) {
+        lblPlayersCount.innerHTML = data.total;
+        console.log(data.total);
+    });
+
+    socket.on("playerStatus", function (data) {
+        playerLoggedIn = data.login;
+
+        if(playerLoggedIn){
+            var child = document.getElementById("btlogin");
+            child.parentNode.removeChild(child);
+            var child = document.getElementById("loginName");
+            child.parentNode.removeChild(child);
+
+            createLabel("playerStatus","playerStatus",data.name + " is logged in",80,20,null);
+        }
+
+    });
+
+</script>
+</body>
+</html>
