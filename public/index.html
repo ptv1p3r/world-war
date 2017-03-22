@@ -82,11 +82,11 @@
         var latlong = {};
 
         latlong[0] = "40.0#175.0";
-        latlong[1] = "-2.654162#82.699830";
-        latlong[2] = "11.654162#-53.699830";
+        latlong[1] = "20.0#175.0";
+        latlong[2] = "-26.0#311.0";
 
 
-        for (var i = 0 ; i < 1; i++) {
+        for (var i = 0 ; i < 3; i++) {
 
             //get the data, and set the offset, we need to do this since the x,y coordinates
             //from the data aren't in the correct format
@@ -222,7 +222,7 @@
         else
             text2.innerHTML = earthMesh.rotation.y;
 
-        earthMesh.rotation.y = Date.now() * -0.001;
+        earthMesh.rotation.y = Date.now() * -0.00001;
         cloudMesh.rotation.y = Date.now() * -0.00001;
 
         if (playerLoggedIn){
