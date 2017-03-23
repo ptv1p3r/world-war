@@ -120,9 +120,9 @@
 
                 });
 
-                socket.on("playersList", function (data) {
-                    createPlayerPositions(data);
-                });
+                //socket.on("playersList", function (data) {
+                    //createPlayerPositions(data);
+                //});
             }
         });
 
@@ -382,11 +382,8 @@
     });
 
     socket.on("playersList", function (data) {
-        //var t = scene.getObjectByName('playersMesh');
-        //scene.remove(t);
-        earthMesh.remove(playersMesh);
-        console.log("aqui");
-        //createPlayerPositions(data);
+        earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
+        createPlayerPositions(data);
     });
 
 </script>
