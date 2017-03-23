@@ -77,30 +77,23 @@
         serverDateTime = document.createElement('div');
         createLabel("serverDateTime","serverDateTime","- nenhum -",10,380,serverDateTime);
 
-        var btlogin = document.createElement("button");
-        var tlogin = document.createTextNode("Login");
-        btlogin.appendChild(tlogin);
-        btlogin.id = "btlogin";
-        btlogin.style.position = 'absolute';
-        btlogin.style.top = 50 + 'px';
-        btlogin.style.left = 50 + 'px';
-        btlogin.onclick = function () {
+        createButton("btlogin","Login",50,50,function () {
             var txtbox = document.getElementById('loginName');
             var intLocal = document.getElementById('country').value;
 
             if (txtbox.value.length > 0) {
                 var value = txtbox.value;
 
-                socket.emit("newPlayer",{
-                    name : value,
-                    local : intLocal
-                })
+                socket.emit("newPlayer", {
+                    name: value,
+                    local: intLocal
+                });
 
                 socket.on("newPlayerResponse", function (data) {
                     playerLoggedIn = data.login;
                     lblPlayersCount.innerHTML = data.playerCount;
 
-                    if(playerLoggedIn){
+                    if (playerLoggedIn) {
                         var child = document.getElementById("btlogin");
                         child.parentNode.removeChild(child);
                         var child = document.getElementById("loginName");
@@ -109,7 +102,7 @@
                         child.parentNode.removeChild(child);
 
                         var playerLocal;
-                        switch (data.local){
+                        switch (data.local) {
                             case '1':
                                 playerLocal = "EU - Europe";
                                 break;
@@ -121,81 +114,18 @@
                                 break;
                         }
 
-                        createLabel("playerStatus","playerStatus",data.name + " is logged in " + playerLocal,80,20,null);
+                        createLabel("playerStatus", "playerStatus", data.name + " is logged in " + playerLocal, 80, 20, null);
 
-                        var geom = new THREE.Geometry();
-                        //var geom = new THREE.SphereGeometry(180,32,32);
-                        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
-                        var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
-                        var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
-
-                        var latlong = {};
-
-                        latlong[0] = "40.0#175.0";
-                        latlong[1] = "20.0#175.0";
-                        latlong[2] = "-26.0#311.0";
-
-
-                        for (var i = 0 ; i < 3; i++) {
-
-                            //get the data, and set the offset, we need to do this since the x,y coordinates
-                            //from the data aren't in the correct format
-                            // var x = parseInt(data[i][0])+180;
-                            // var y = parseInt((data[i][1])-84)*-1;
-                            // var value = parseFloat(data[i][2]);
-
-                            var d = latlong[i].split("#");
-
-                            var position = latLongToVector3(d[0], d[1], 175);
-
-                            // create the cube
-                            var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
-
-                            // position the cube correctly
-                            cube.position.set(position.x,position.y,position.z);
-                            cube.lookAt( new THREE.Vector3(0,0,0) );
-
-                            // merge with main model
-                            THREE.GeometryUtils.merge(geom,cube);
-                        }
-
-                        //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
-                        var total = new THREE.Mesh(geom,material);
-
-                        earthMesh.add(total);
+                        createPlayerPositions();
                     }
 
                 });
-
             }
-
-        };
+        });
 
         createInputField('loginName',50,100);
 
-        // Create the element:
-        var combo_box = document.createElement('select');
-        combo_box.name = 'country';
-        combo_box.id = 'country';
-        combo_box.style.position = 'absolute';
-        combo_box.style.top = 50 + 'px';
-        combo_box.style.left = 280 + 'px';
-
-        var choice = document.createElement('option');
-        choice.value = '1';
-        choice.appendChild(document.createTextNode('EU - Europe'));
-        combo_box.appendChild(choice);
-
-        choice = document.createElement('option');
-        choice.value = '2';
-        choice.appendChild(document.createTextNode('AF - Africa'));
-        combo_box.appendChild(choice);
-
-        choice = document.createElement('option');
-        choice.value = '3';
-        choice.appendChild(document.createTextNode('AU - Australia'));
-
-        combo_box.appendChild(choice);
+        createComboBox("country",50,280);
 
         text3 = document.createElement('div');
         text3.style.position = 'absolute';
@@ -208,21 +138,14 @@
         text3.style.top = 12 + 'px';
         text3.style.left = 880 + 'px';
 
-        // butao city lights
-        var btn = document.createElement("button");
-        var t = document.createTextNode("City Lights");
-        btn.appendChild(t);
-        btn.style.position = 'absolute';
-        btn.style.top = 10 + 'px';
-        btn.style.left = 800 + 'px';
-        btn.onclick = function() {
+        createButton("CityLights","City Lights",10,800,function() {
 
             if (bolCityLightsON){
-                earthMesh.material.map = THREE.ImageUtils.loadTexture('resources/earthlights1k.jpg');
+                earthMesh.material.map = THREE.ImageUtils.loadTexture('images/earthlights1k.jpg');
                 text3.style.color ="lightgreen";
                 text3.innerHTML = "ON";
             } else {
-                earthMesh.material.map = THREE.ImageUtils.loadTexture('resources/earthmap1k.jpg');
+                earthMesh.material.map = THREE.ImageUtils.loadTexture('images/earthmap4k.jpg');
                 text3.style.color ="red";
                 text3.innerHTML = "OFF";
             }
@@ -231,14 +154,11 @@
 
             //cloudMesh.material.needsUpdate = true;
             earthMesh.material.needsUpdate = true;
-        };
 
-        document.body.appendChild(btlogin);
-        document.body.appendChild(btn);
+        });
+
         document.body.appendChild(text2);
         document.body.appendChild(text3);
-        document.body.appendChild(combo_box);
-
 
     }
 
@@ -312,6 +232,47 @@
         scene.add(skyBoxMesh);
     }
 
+    function createPlayerPositions() {
+        var geom = new THREE.Geometry();
+        //var geom = new THREE.SphereGeometry(180,32,32);
+        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
+        var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
+
+
+        var latlong = {};
+
+        latlong[0] = "40.0#175.0";
+        latlong[1] = "20.0#175.0";
+        latlong[2] = "-26.0#311.0";
+
+
+        for (var i = 0 ; i < 3; i++) {
+
+            // var x = parseInt(data[i][0])+180;
+            // var y = parseInt((data[i][1])-84)*-1;
+            // var value = parseFloat(data[i][2]);
+
+            var d = latlong[i].split("#");
+
+            var position = latLongToVector3(d[0], d[1], 175);
+
+            // create the cube
+            var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
+
+            // position the cube correctly
+            cube.position.set(position.x,position.y,position.z);
+            cube.lookAt( new THREE.Vector3(0,0,0) );
+
+            // merge with main model
+            THREE.GeometryUtils.merge(geom,cube);
+        }
+
+        //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
+        var total = new THREE.Mesh(geom,cubeMat);
+
+        earthMesh.add(total);
+    }
+
     /**
      * Metodo que efetua o render da scene e camera
      */
@@ -362,6 +323,45 @@
         field.id = id;
 
         document.body.appendChild(field);
+    }
+
+    function createComboBox(id, x, y) {
+        var combo_box = document.createElement('select');
+        combo_box.name = id;
+        combo_box.id = id;
+        combo_box.style.position = 'absolute';
+        combo_box.style.top = x + 'px';
+        combo_box.style.left = y + 'px';
+
+        var choice = document.createElement('option');
+        choice.value = '1';
+        choice.appendChild(document.createTextNode('EU - Europe'));
+        combo_box.appendChild(choice);
+
+        choice = document.createElement('option');
+        choice.value = '2';
+        choice.appendChild(document.createTextNode('AF - Africa'));
+        combo_box.appendChild(choice);
+
+        choice = document.createElement('option');
+        choice.value = '3';
+        choice.appendChild(document.createTextNode('AU - Australia'));
+
+        combo_box.appendChild(choice);
+        document.body.appendChild(combo_box);
+    }
+
+    function createButton(id, title, x, y, data) {
+        var btn = document.createElement("button");
+        var t = document.createTextNode(title);
+        btn.appendChild(t);
+        btn.id = id;
+        btn.style.position = 'absolute';
+        btn.style.top = x + 'px';
+        btn.style.left = y + 'px';
+        btn.onclick = data;
+
+        document.body.appendChild(btn);
     }
 
     /**
