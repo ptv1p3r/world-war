@@ -115,10 +115,12 @@
                         }
 
                         createLabel("playerStatus", "playerStatus", data.name + " is logged in " + playerLocal, 80, 20, null);
-
-                        createPlayerPositions();
                     }
 
+                });
+
+                socket.on("playersList", function (playersList) {
+                    createPlayerPositions(playersList);
                 });
             }
         });
@@ -232,7 +234,7 @@
         scene.add(skyBoxMesh);
     }
 
-    function createPlayerPositions() {
+    function createPlayerPositions(playersList) {
         var geom = new THREE.Geometry();
         //var geom = new THREE.SphereGeometry(180,32,32);
         //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
@@ -244,6 +246,10 @@
         latlong[0] = "40.0#175.0";
         latlong[1] = "20.0#175.0";
         latlong[2] = "-26.0#311.0";
+
+        for (var i= 0; i < playersList.length; i++){
+         console.log(data[i].name);
+         }
 
 
         for (var i = 0 ; i < 3; i++) {

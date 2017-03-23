@@ -74,6 +74,18 @@ io.sockets.on('connection', function (socket) {
                 local       : player.local
             });
 
+            var pack = [];
+            for (var i in PLAYERS_LIST){
+                var player = PLAYERS_LIST[i];
+                pack.push({
+                    id : player.id,
+                    name : player.name,
+                    local : player.local
+                });
+            }
+
+            socket.emit('playersList',pack);
+
             console.log("Player: " + player.name + " added!");
         } else {
             socket.emit('newPlayerResponse',{
