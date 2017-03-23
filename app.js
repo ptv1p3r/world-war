@@ -61,7 +61,18 @@ io.sockets.on('connection', function (socket) {
         if (!playerExists) {
             var player = Player(socket.id); // cria novo player
             player.name = data.name;
-            player.local = data.local;
+
+            switch (data.local){
+                case '1':
+                    player.local = "40.0#175.0"; //EU
+                    break;
+                case '2':
+                    player.local = "20.0#175.0"; //AF
+                    break;
+                case '3':
+                    player.local = "-26.0#311.0"; //AU
+                    break;
+            }
 
             PLAYERS_LIST[socket.id] = player;
             playerCount++;
@@ -128,7 +139,7 @@ setInterval(function () {
                 playerCount : playerCount,
                 timestamp : new Date()
             });
-            //socket.emit('players',pack);
+            socket.emit('playersList',pack);
         }
 },60 * 1000); //60s //40ms 1000/25
 

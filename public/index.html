@@ -22,7 +22,7 @@
         FAR = 10000,
         DISTANCIA_MAX = 1000;
     var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
-    var lblPlayersCount, playerLoggedIn = false, serverDateTime;
+    var lblPlayersCount, playerLoggedIn = false, serverDateTime, globalPlayersList = {}, playersMesh ;
 
     init();
     animate();
@@ -119,8 +119,8 @@
 
                 });
 
-                socket.on("playersList", function (playersList) {
-                    createPlayerPositions(playersList);
+                socket.on("playersList", function (data) {
+                    createPlayerPositions(data);
                 });
             }
         });
@@ -190,7 +190,6 @@
             //elem.remove();
             //elem.visible = false;
 
-
         }
 
         render();
@@ -240,25 +239,8 @@
         //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
         var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
 
-
-        var latlong = {};
-
-        latlong[0] = "40.0#175.0";
-        latlong[1] = "20.0#175.0";
-        latlong[2] = "-26.0#311.0";
-
         for (var i= 0; i < playersList.length; i++){
-         console.log(data[i].name);
-         }
-
-
-        for (var i = 0 ; i < 3; i++) {
-
-            // var x = parseInt(data[i][0])+180;
-            // var y = parseInt((data[i][1])-84)*-1;
-            // var value = parseFloat(data[i][2]);
-
-            var d = latlong[i].split("#");
+            var d = playersList[i].local.split("#");
 
             var position = latLongToVector3(d[0], d[1], 175);
 
@@ -271,12 +253,14 @@
 
             // merge with main model
             THREE.GeometryUtils.merge(geom,cube);
+
         }
 
         //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
-        var total = new THREE.Mesh(geom,cubeMat);
+        playersMesh = new THREE.Mesh(geom,cubeMat);
+        playersMesh.name = 'playersMesh';
 
-        earthMesh.add(total);
+        earthMesh.add(playersMesh);
     }
 
     /**
@@ -394,6 +378,14 @@
         lblPlayersCount.innerHTML = data.playerCount;
         serverDateTime.innerHTML = data.timestamp;
         //console.log(data.total);
+    });
+
+    socket.on("playersList", function (data) {
+        //var t = scene.getObjectByName('playersMesh');
+        //scene.remove(t);
+        earthMesh.remove(playersMesh);
+        console.log("aqui");
+        //createPlayerPositions(data);
     });
 
 </script>
