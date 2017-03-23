@@ -69,12 +69,8 @@
 
         earthMesh.add(cloudMesh);
 
-
-        // the geometry that will contain all our cubes
         var geom = new THREE.Geometry();
         //var geom = new THREE.SphereGeometry(180,32,32);
-        // material to use for each of our elements. Could use a set of materials to
-        // add colors relative to the density. Not done here.
         //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
         var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
         var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
@@ -109,7 +105,6 @@
             THREE.GeometryUtils.merge(geom,cube);
         }
 
-        // create a new mesh, containing all the other meshes.
         //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
         var total = new THREE.Mesh(geom,material);
 
@@ -158,18 +153,44 @@
         btlogin.style.left = 50 + 'px';
         btlogin.onclick = function () {
             var txtbox = document.getElementById('loginName');
+            var intLocal = document.getElementById('country').value;
 
             if (txtbox.value.length > 0) {
                 var value = txtbox.value;
 
                 socket.emit("newPlayer",{
-                    name : value
+                    name : value,
+                    local : intLocal
                 })
             }
 
         };
 
         createInputField('loginName',50,100);
+
+        // Create the element:
+        var combo_box = document.createElement('select');
+        combo_box.name = 'country';
+        combo_box.id = 'country';
+        combo_box.style.position = 'absolute';
+        combo_box.style.top = 50 + 'px';
+        combo_box.style.left = 280 + 'px';
+
+        var choice = document.createElement('option');
+        choice.value = '1';
+        choice.appendChild(document.createTextNode('EU - Europe'));
+        combo_box.appendChild(choice);
+
+        choice = document.createElement('option');
+        choice.value = '2';
+        choice.appendChild(document.createTextNode('AF - Africa'));
+        combo_box.appendChild(choice);
+
+        choice = document.createElement('option');
+        choice.value = '3';
+        choice.appendChild(document.createTextNode('AU - Australia'));
+
+        combo_box.appendChild(choice);
 
         text3 = document.createElement('div');
         text3.style.position = 'absolute';
@@ -211,6 +232,7 @@
         document.body.appendChild(btn);
         document.body.appendChild(text2);
         document.body.appendChild(text3);
+        document.body.appendChild(combo_box);
 
 
     }
@@ -311,22 +333,38 @@
         return new THREE.Vector3(x,y,z);
     }
 
-    socket.on("playersCount", function (data) {
-        lblPlayersCount.innerHTML = data.total;
+    socket.on("serverStatus", function (data) {
+        lblPlayersCount.innerHTML = data.playerCount;
         serverDateTime.innerHTML = data.timestamp;
-        console.log(data.total);
+        //console.log(data.total);
     });
 
     socket.on("playerStatus", function (data) {
         playerLoggedIn = data.login;
+        lblPlayersCount.innerHTML = data.playerCount;
 
         if(playerLoggedIn){
             var child = document.getElementById("btlogin");
             child.parentNode.removeChild(child);
             var child = document.getElementById("loginName");
             child.parentNode.removeChild(child);
+            var child = document.getElementById("country");
+            child.parentNode.removeChild(child);
 
-            createLabel("playerStatus","playerStatus",data.name + " is logged in",80,20,null);
+            var playerLocal;
+            switch (data.local){
+                case '1':
+                    playerLocal = "EU - Europe";
+                    break;
+                case '2':
+                    playerLocal = "AF - Africa";
+                    break;
+                case '3':
+                    playerLocal = "AU - Australia";
+                    break;
+            }
+
+            createLabel("playerStatus","playerStatus",data.name + " is logged in " + playerLocal,80,20,null);
         }
 
     });

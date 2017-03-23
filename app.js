@@ -67,7 +67,8 @@ var Player = function (id,name) {
         id : id,
         number : "" + Math.floor(10 * Math.random()),
         x : 0,
-        y : 0
+        y : 0,
+        local : 0
     }
     return self;
 }
@@ -106,14 +107,17 @@ io.sockets.on('connection', function (socket) {
         if (!playerExists) {
             var player = Player(socket.id); // cria novo player
             player.name = data.name;
+            player.local = data.local;
 
             PLAYERS_LIST[socket.id] = player;
             playerCount++;
 
             socket.emit('playerStatus',{
-                login   : true,
-                id      : socket.id,
-                name    : player.name
+                login       : true,
+                id          : socket.id,
+                name        : player.name,
+                playerCount : playerCount,
+                local       : player.local
             });
 
             console.log("Player: " + player.name + " added!");
@@ -122,7 +126,7 @@ io.sockets.on('connection', function (socket) {
                 login : false
             });
 
-            console.log("Player: " + player.name + " exists!");
+            //console.log("Player: " + player.name + " exists!");
         }
 
     });
@@ -135,15 +139,25 @@ var add_minutes =  function (dt, minutes) {
 
 setInterval(function () {
 
-    serverDateNow = add_minutes(serverDateNow,1);
+    //serverDateNow = add_minutes(serverDateNow,1);
+        var pack = [];
 
-        for (var i in SOCKET_LIST) {
-            var socket = SOCKET_LIST[i];
-            socket.emit('playersCount',{
-                total : playerCount,
-                timestamp : serverDateNow
+        for (var i in PLAYERS_LIST) {
+            var player = PLAYERS_LIST[i];
+            pack.push({
+                id : player.id,
+                name : player.name,
+                local : player.local
             });
         }
 
+        for (var i in SOCKET_LIST){
+            var socket = SOCKET_LIST[i];
+            socket.emit('serverStatus',{
+                playerCount : playerCount,
+                timestamp : new Date()
+            });
+            //socket.emit('players',pack);
+        }
 },60 * 1000); //60s //40ms 1000/25
 
