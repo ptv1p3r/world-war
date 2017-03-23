@@ -65,6 +65,8 @@ io.sockets.on('connection', function (socket) {
             switch (data.local){
                 case '1':
                     player.local = "40.0#175.0"; //EU
+                    //player.local = "-10.0#120.0"; //BR
+                    //player.local = "40.0#80.0"; //USA
                     break;
                 case '2':
                     player.local = "20.0#175.0"; //AF

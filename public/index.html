@@ -120,9 +120,6 @@
 
                 });
 
-                //socket.on("playersList", function (data) {
-                    //createPlayerPositions(data);
-                //});
             }
         });
 
@@ -178,7 +175,7 @@
         else
             text2.innerHTML = earthMesh.rotation.y;
 
-        earthMesh.rotation.y = Date.now() * -0.00001;
+        earthMesh.rotation.y = Date.now() * -0.001;
         cloudMesh.rotation.y = Date.now() * -0.00001;
 
         if (playerLoggedIn){
@@ -382,7 +379,7 @@
     });
 
     socket.on("playersList", function (data) {
-        earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
+        //earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
         createPlayerPositions(data);
     });
 
