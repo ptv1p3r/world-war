@@ -10,6 +10,7 @@
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <canvas id="myCanvas"></canvas>
 <script src="js/three.js"></script>
+<script src="js/date.format.js"></script>
 
 <script>
     var socket = io();
@@ -376,7 +377,7 @@
 
     socket.on("serverStatus", function (data) {
         lblPlayersCount.innerHTML = data.playerCount;
-        serverDateTime.innerHTML = data.timestamp;
+        serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-MM-dd HH:mm:ss');
         //console.log(data.total);
     });
 
