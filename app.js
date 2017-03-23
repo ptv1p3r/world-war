@@ -1,7 +1,7 @@
 var tools = require('./server/initServer');
 var serverDateStart, serverDateNow, serverDateEnd;
 
-// Setup do servidor
+// Setup do servidors
 var app = tools.initServer();
 var serv  = require("http").Server(app);
 serv.listen(2000); // liga o servidor em determinada porta
