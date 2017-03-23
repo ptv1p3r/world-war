@@ -34,6 +34,9 @@ io.sockets.on('connection', function (socket) {
 
     SOCKET_LIST[socket.id] = socket; // guarda ligacao na lista
 
+    /**
+     * Metodo automatico que valida o disconect do socket pelo cliente
+     */
     socket.on('disconnect', function () { // automatico nao necessita de mensagem do cliente
         delete SOCKET_LIST[socket.id]; // elimina a socket
         delete PLAYERS_LIST[socket.id]; // elimina o player
@@ -63,7 +66,7 @@ io.sockets.on('connection', function (socket) {
             PLAYERS_LIST[socket.id] = player;
             playerCount++;
 
-            socket.emit('playerStatus',{
+            socket.emit('newPlayerResponse',{
                 login       : true,
                 id          : socket.id,
                 name        : player.name,
@@ -73,7 +76,7 @@ io.sockets.on('connection', function (socket) {
 
             console.log("Player: " + player.name + " added!");
         } else {
-            socket.emit('playerStatus',{
+            socket.emit('newPlayerResponse',{
                 login : false
             });
 
@@ -89,7 +92,6 @@ io.sockets.on('connection', function (socket) {
 var add_minutes =  function (dt, minutes) {
     return new Date(dt.getTime() + minutes*60000);
 }
-
 
 /**
  * Ciclo de loop a cada 60 segundos (1 minuto)

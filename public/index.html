@@ -24,6 +24,12 @@
     var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
     var lblPlayersCount, playerLoggedIn = false, serverDateTime;
 
+    init();
+    animate();
+
+    /**
+     * Metodo que inicia a cena
+     */
     function init(){
         //SCENE
         scene = new THREE.Scene();
@@ -44,82 +50,11 @@
         var light = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(light);
 
-        var geometry = new THREE.SphereGeometry(175,32,32);
+        createEarth();
 
-        //var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
-        material = new THREE.MeshPhongMaterial();
-        material.map = THREE.ImageUtils.loadTexture('images/earthmap4k.jpg');            // Diffuse Texture
-        material.bumpMap = THREE.ImageUtils.loadTexture('images/earthbump4k.jpg');       // Bump Texture
-        material.bumpScale = 0.05;
-        material.specularMap = THREE.ImageUtils.loadTexture('images/earthspec4k.jpg');   // Spectacular Texture
-        material.specular = new THREE.Color('grey');
-        earthMesh = new THREE.Mesh(geometry, material);
+        createEarthClouds();
 
-        var geometry1   = new THREE.SphereGeometry(177, 32, 32);
-        var material1  = new THREE.MeshPhongMaterial({
-            map         : new THREE.ImageUtils.loadTexture('images/earthcloudmap2.jpg'),
-            side        : THREE.DoubleSide,
-            opacity     : 0.3,
-            transparent : true,
-            depthWrite  : false
-        });
-        cloudMesh = new THREE.Mesh(geometry1, material1);
-
-        earthMesh.add(cloudMesh);
-
-        var geom = new THREE.Geometry();
-        //var geom = new THREE.SphereGeometry(180,32,32);
-        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
-        var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
-        var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
-
-        var latlong = {};
-
-        latlong[0] = "40.0#175.0";
-        latlong[1] = "20.0#175.0";
-        latlong[2] = "-26.0#311.0";
-
-
-        for (var i = 0 ; i < 3; i++) {
-
-            //get the data, and set the offset, we need to do this since the x,y coordinates
-            //from the data aren't in the correct format
-           // var x = parseInt(data[i][0])+180;
-           // var y = parseInt((data[i][1])-84)*-1;
-           // var value = parseFloat(data[i][2]);
-
-            var d = latlong[i].split("#");
-
-            var position = latLongToVector3(d[0], d[1], 175);
-
-            // create the cube
-            var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
-
-            // position the cube correctly
-            cube.position.set(position.x,position.y,position.z);
-            cube.lookAt( new THREE.Vector3(0,0,0) );
-
-            // merge with main model
-            THREE.GeometryUtils.merge(geom,cube);
-        }
-
-        //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
-        var total = new THREE.Mesh(geom,material);
-
-        earthMesh.add(total);
-        //scene.add(total);
-
-        // SKYBOX
-        var geometry2  = new THREE.SphereGeometry(1000, 32, 32);
-        var material2  = new THREE.MeshBasicMaterial({
-            map   : new THREE.ImageUtils.loadTexture('images/skybox1.jpg'),
-            side  : THREE.BackSide
-        });
-        var skyBoxMesh  = new THREE.Mesh(geometry2, material2); // cria mesh com geometria e material
-
-        //earthMesh.add(skyBoxMesh);
-        scene.add(earthMesh);
-        scene.add(skyBoxMesh);
+        createSkyBox();
 
         window.addEventListener( 'resize', onWindowResize, false );
 
@@ -160,6 +95,78 @@
                     name : value,
                     local : intLocal
                 })
+
+                socket.on("newPlayerResponse", function (data) {
+                    playerLoggedIn = data.login;
+                    lblPlayersCount.innerHTML = data.playerCount;
+
+                    if(playerLoggedIn){
+                        var child = document.getElementById("btlogin");
+                        child.parentNode.removeChild(child);
+                        var child = document.getElementById("loginName");
+                        child.parentNode.removeChild(child);
+                        var child = document.getElementById("country");
+                        child.parentNode.removeChild(child);
+
+                        var playerLocal;
+                        switch (data.local){
+                            case '1':
+                                playerLocal = "EU - Europe";
+                                break;
+                            case '2':
+                                playerLocal = "AF - Africa";
+                                break;
+                            case '3':
+                                playerLocal = "AU - Australia";
+                                break;
+                        }
+
+                        createLabel("playerStatus","playerStatus",data.name + " is logged in " + playerLocal,80,20,null);
+
+                        var geom = new THREE.Geometry();
+                        //var geom = new THREE.SphereGeometry(180,32,32);
+                        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
+                        var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
+                        var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
+
+                        var latlong = {};
+
+                        latlong[0] = "40.0#175.0";
+                        latlong[1] = "20.0#175.0";
+                        latlong[2] = "-26.0#311.0";
+
+
+                        for (var i = 0 ; i < 3; i++) {
+
+                            //get the data, and set the offset, we need to do this since the x,y coordinates
+                            //from the data aren't in the correct format
+                            // var x = parseInt(data[i][0])+180;
+                            // var y = parseInt((data[i][1])-84)*-1;
+                            // var value = parseFloat(data[i][2]);
+
+                            var d = latlong[i].split("#");
+
+                            var position = latLongToVector3(d[0], d[1], 175);
+
+                            // create the cube
+                            var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
+
+                            // position the cube correctly
+                            cube.position.set(position.x,position.y,position.z);
+                            cube.lookAt( new THREE.Vector3(0,0,0) );
+
+                            // merge with main model
+                            THREE.GeometryUtils.merge(geom,cube);
+                        }
+
+                        //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
+                        var total = new THREE.Mesh(geom,material);
+
+                        earthMesh.add(total);
+                    }
+
+                });
+
             }
 
         };
@@ -235,6 +242,9 @@
 
     }
 
+    /**
+     * Metodo que é chamada a cada frame
+     */
     function animate() {
         requestAnimationFrame(animate);
 
@@ -250,10 +260,10 @@
 
         if (playerLoggedIn){
             /*var el = document.getElementById('btlogin');
-            el.parentNode.removeChild(el);
-            var el1 = document.getElementById('loginName');
-            el1.parentNode.removeChild(el1);
-*/
+             el.parentNode.removeChild(el);
+             var el1 = document.getElementById('loginName');
+             el1.parentNode.removeChild(el1);
+             */
             //var elem = document.getElementById("btlogin");
             //elem.remove();
             //elem.visible = false;
@@ -264,10 +274,54 @@
         render();
     }
 
+    function createEarth() {
+        var geometry = new THREE.SphereGeometry(175,32,32);
+
+        //var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
+        material = new THREE.MeshPhongMaterial();
+        material.map = THREE.ImageUtils.loadTexture('images/earthmap4k.jpg');            // Diffuse Texture
+        material.bumpMap = THREE.ImageUtils.loadTexture('images/earthbump4k.jpg');       // Bump Texture
+        material.bumpScale = 0.05;
+        material.specularMap = THREE.ImageUtils.loadTexture('images/earthspec4k.jpg');   // Spectacular Texture
+        material.specular = new THREE.Color('grey');
+        earthMesh = new THREE.Mesh(geometry, material);
+        scene.add(earthMesh);
+    }
+
+    function createEarthClouds() {
+        var geometry1   = new THREE.SphereGeometry(177, 32, 32);
+        var material1  = new THREE.MeshPhongMaterial({
+            map         : new THREE.ImageUtils.loadTexture('images/earthcloudmap2.jpg'),
+            side        : THREE.DoubleSide,
+            opacity     : 0.3,
+            transparent : true,
+            depthWrite  : false
+        });
+        cloudMesh = new THREE.Mesh(geometry1, material1);
+        earthMesh.add(cloudMesh);
+    }
+
+    function createSkyBox() {
+        // SKYBOX
+        var geometry2  = new THREE.SphereGeometry(1000, 32, 32);
+        var material2  = new THREE.MeshBasicMaterial({
+            map   : new THREE.ImageUtils.loadTexture('images/skybox1.jpg'),
+            side  : THREE.BackSide
+        });
+        var skyBoxMesh  = new THREE.Mesh(geometry2, material2); // cria mesh com geometria e material
+        scene.add(skyBoxMesh);
+    }
+
+    /**
+     * Metodo que efetua o render da scene e camera
+     */
     function render() {
         renderer.render(scene, camera);
     }
 
+    /**
+     * Metodo que controla o redimensionamento da janela do browser
+     */
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -310,10 +364,9 @@
         document.body.appendChild(field);
     }
 
-    init();
-    animate();
-
-    // convert the positions from a lat, lon to a position on a sphere.
+    /**
+     * Metodo que converte posicoes latitude e longitude para posicoes em um esfera
+     */
     function latLongToVector3(lat, lon, radius) {
        // var phi = (lat)*Math.PI/180;
        // var theta = (lon-180)*Math.PI/180;
@@ -335,36 +388,6 @@
         lblPlayersCount.innerHTML = data.playerCount;
         serverDateTime.innerHTML = data.timestamp;
         //console.log(data.total);
-    });
-
-    socket.on("playerStatus", function (data) {
-        playerLoggedIn = data.login;
-        lblPlayersCount.innerHTML = data.playerCount;
-
-        if(playerLoggedIn){
-            var child = document.getElementById("btlogin");
-            child.parentNode.removeChild(child);
-            var child = document.getElementById("loginName");
-            child.parentNode.removeChild(child);
-            var child = document.getElementById("country");
-            child.parentNode.removeChild(child);
-
-            var playerLocal;
-            switch (data.local){
-                case '1':
-                    playerLocal = "EU - Europe";
-                    break;
-                case '2':
-                    playerLocal = "AF - Africa";
-                    break;
-                case '3':
-                    playerLocal = "AU - Australia";
-                    break;
-            }
-
-            createLabel("playerStatus","playerStatus",data.name + " is logged in " + playerLocal,80,20,null);
-        }
-
     });
 
 </script>
