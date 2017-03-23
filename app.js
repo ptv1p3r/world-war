@@ -45,8 +45,6 @@ io.sockets.on('connection', function (socket) {
         console.log('player deleted' + ' id: ' + socket.id);
     })
 
-    console.log('new socket connection' + ' id: ' + socket.id + " ip: " + socket.ip);
-
     socket.on("newPlayer", function (data) {
         var playerExists = false;
 
@@ -84,12 +82,18 @@ io.sockets.on('connection', function (socket) {
 
     });
 
+    console.log('new socket connection' + ' id: ' + socket.id + " ip: " + socket.ip);
+
 });
 
 var add_minutes =  function (dt, minutes) {
     return new Date(dt.getTime() + minutes*60000);
 }
 
+
+/**
+ * Ciclo de loop a cada 60 segundos (1 minuto)
+ */
 setInterval(function () {
 
     //serverDateNow = add_minutes(serverDateNow,1);
