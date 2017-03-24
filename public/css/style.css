@@ -3,6 +3,19 @@ body {
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-canvas { width: 100%; height: 100% }
+canvas {
+    width: 100%;
+    height: 100%;
+}
 
 a {color: #00B7FF;}
+
+#pnlPlayerInfo {
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    width: 100px;
+    border: 3px solid #73AD21;
+    color: white;
+}
+

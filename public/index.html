@@ -7,6 +7,15 @@
 </head>
 <body>
 
+<div id="pnlPlayerInfo" style="display: none">
+    <fieldset>
+        <legend>Personal info:</legend>
+        Name:  <div id="playerName"></div><br>
+        Email: <div id="playerEmail"></div><br>
+        Local: <div id="playerlocal"></div>
+    </fieldset>
+</div>
+
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <canvas id="myCanvas"></canvas>
 <script src="js/three.js"></script>
@@ -14,6 +23,8 @@
 
 <script>
     var socket = io();
+
+    var pnlPlayerInfo = document.getElementById("pnlPlayerInfo");
 
     var WIDTH = window.innerWidth,
         HEIGHT = window.innerHeight-4,
@@ -102,6 +113,8 @@
                         var child = document.getElementById("country");
                         child.parentNode.removeChild(child);
 
+                        pnlPlayerInfo.style.display = "inline-block";
+
                         var playerLocal;
                         switch (data.local) {
                             case '1':
@@ -114,7 +127,8 @@
                                 playerLocal = "AU - Australia";
                                 break;
                         }
-
+                        //document.getElementById("playerName").setAttribute('value',data.name);
+                        document.getElementById('playerName').innerHTML = data.name ;
                         createLabel("playerStatus", "playerStatus", data.name + " is logged in " + playerLocal, 80, 20, null);
                     }
 
@@ -374,12 +388,12 @@
 
     socket.on("serverStatus", function (data) {
         lblPlayersCount.innerHTML = data.playerCount;
-        serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-MM-dd HH:mm:ss');
+        serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss');
         //console.log(data.total);
     });
 
     socket.on("playersList", function (data) {
-        //earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
+        earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
         createPlayerPositions(data);
     });
 

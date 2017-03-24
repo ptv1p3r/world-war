@@ -1,19 +1,20 @@
 var tools = require('./server/initServer');
 var serverDateStart, serverDateNow, serverDateEnd;
-
-// Setup do servidors
-var app = tools.initServer();
-var serv  = require("http").Server(app);
-serv.listen(2000); // liga o servidor em determinada porta
-
-serverDateNow=serverDateStart = new Date();
-
-console.log(serverDateStart + ' ->World@War Public Server pré-alpha Started...');
-
 var SOCKET_LIST = {}; // lista de ligacoes
 var PLAYERS_LIST = {}; // lista de jogadores
 var playerCount = 0;
 
+// 40ms = 1000/25
+// 60s  = 60 * 1000
+var CYCLE_TIME = 1000/25;      // tempo em milisegundos para cada ciclo de loop
+
+/**
+ * Classe para jogador
+ * @param id
+ * @param name
+ * @returns {{name: *, id: *, number: string, x: number, y: number, local: number}}
+ * @constructor
+ */
 var Player = function (id,name) {
     var self = {
         name : name,
@@ -25,6 +26,15 @@ var Player = function (id,name) {
     }
     return self;
 }
+
+// Setup do servidor
+var app = tools.initServer();
+var serv  = require("http").Server(app);
+serv.listen(2000); // liga o servidor em determinada porta
+
+serverDateNow=serverDateStart = new Date();
+
+console.log(serverDateStart + ' ->World@War Public Server pré-alpha Started...');
 
 var io  = require('socket.io') (serv,{});
 io.sockets.on('connection', function (socket) {
@@ -119,7 +129,7 @@ var add_minutes =  function (dt, minutes) {
 }
 
 /**
- * Ciclo de loop a cada 60 segundos (1 minuto)
+ * Ciclo de loop
  */
 setInterval(function () {
 
@@ -143,5 +153,5 @@ setInterval(function () {
             });
             socket.emit('playersList',pack);
         }
-},60 * 1000); //60s //40ms 1000/25
+}, CYCLE_TIME);
 
