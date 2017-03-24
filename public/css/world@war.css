@@ -19,7 +19,9 @@ a {color: #00B7FF;}
     position: absolute;
     width: 100%;
     color: darkgrey;
+/*    white-space:nowrap;*/
 }
+#headerBox tr { line-height: 10px; }
 
 #pnlPlayerInfo {
     position: absolute;
