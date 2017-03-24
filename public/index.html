@@ -43,7 +43,10 @@
         ASPECT = WIDTH / HEIGHT,
         NEAR = 0.1,
         FAR = 10000,
-        DISTANCIA_MAX = 1000;
+        DISTANCIA_MAX = 1000,
+        TERRA_ROTACAO_VELOCIDADE = -0.00001,
+        NUVENS_ROTACAO_VELOCIDADE = -0.00001;
+
     var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
     var lblPlayersCount, playerLoggedIn = false, serverDateTime, globalPlayersList = {}, playersMesh ;
 
@@ -110,16 +113,6 @@
         createSkyBox();
 
         window.addEventListener( 'resize', onWindowResize, false );
-
-        text2 = document.createElement('div');
-        text2.style.position = 'absolute';
-        //text2.style.zIndex = 1;
-        text2.style.width = 100;
-        text2.style.height = 100;
-        text2.style.backgroundColor = "blue";
-        text2.innerHTML = "yoooo!";
-        text2.style.top = 40 + 'px';
-        text2.style.left = 800 + 'px';
 
         createLabel("playerCount","playerCount","World@War Server Player's: ",10,20,null);
         createLabel("serverDateTime","serverDateTime","Server Date/Time: ",10,250,null);
@@ -200,7 +193,6 @@
 
         });
 
-        document.body.appendChild(text2);
     }
 
     /**
@@ -209,27 +201,8 @@
     function animate() {
         requestAnimationFrame(animate);
 
-        if (text2.textContent)
-            text2.textContent = earthMesh.rotation.y;
-        else if (text2.innerText)
-            text2.innerText = earthMesh.rotation.y;
-        else
-            text2.innerHTML = earthMesh.rotation.y;
-
-        earthMesh.rotation.y = Date.now() * -0.001;
-        cloudMesh.rotation.y = Date.now() * -0.00001;
-
-        if (playerLoggedIn){
-            /*var el = document.getElementById('btlogin');
-             el.parentNode.removeChild(el);
-             var el1 = document.getElementById('loginName');
-             el1.parentNode.removeChild(el1);
-             */
-            //var elem = document.getElementById("btlogin");
-            //elem.remove();
-            //elem.visible = false;
-
-        }
+        earthMesh.rotation.y = Date.now() * TERRA_ROTACAO_VELOCIDADE;
+        cloudMesh.rotation.y = Date.now() * NUVENS_ROTACAO_VELOCIDADE;
 
         render();
     }
