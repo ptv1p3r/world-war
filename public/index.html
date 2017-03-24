@@ -6,7 +6,16 @@
     <link rel="stylesheet" href="css/world@war.css">
 </head>
 <body>
+<div id="signDiv">
+    Username: <input id="signDiv-username" type="text"></input><br>
+    Password: <input id="signDiv-password" type="password"></input>
+    <button id="signDiv-signIn">Sign In</button>
+    <button id="signDiv-signUp">Sign Up</button>
+</div>
 
+<div id="gameDiv" style="display: none">
+    <canvas id="myCanvas" style="display: none"></canvas>
+</div>
 <div id="pnlPlayerInfo" style="display: none">
     <fieldset>
         <legend>Personal info:</legend>
@@ -15,16 +24,18 @@
         Local: <div id="playerlocal"></div>
     </fieldset>
 </div>
-
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-<canvas id="myCanvas"></canvas>
 <script src="js/three.js"></script>
 <script src="js/date.format.js"></script>
-
 <script>
-    var socket = io();
-
     var pnlPlayerInfo = document.getElementById("pnlPlayerInfo");
+    var signDiv = document.getElementById('signDiv');
+    var gameDiv = document.getElementById('gameDiv');
+    var myCanvas = document.getElementById('myCanvas');
+    var signDivUsername = document.getElementById('signDiv-username');
+    var signDivSignIn = document.getElementById('signDiv-signIn');
+    var signDivSignUp = document.getElementById('signDiv-signUp');
+    var signDivPassword = document.getElementById('signDiv-password');
 
     var WIDTH = window.innerWidth,
         HEIGHT = window.innerHeight-4,
@@ -36,7 +47,37 @@
     var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
     var lblPlayersCount, playerLoggedIn = false, serverDateTime, globalPlayersList = {}, playersMesh ;
 
-    init();
+    var socket = io(); // inicia conecao pelo socket
+
+    signDivSignIn.onclick = function(){
+        socket.emit('signIn',{username:signDivUsername.value,password:signDivPassword.value});
+    };
+    signDivSignUp.onclick = function(){
+        socket.emit('signUp',{username:signDivUsername.value,password:signDivPassword.value});
+    };
+
+    socket.on('signInResponse',function(data){
+        if(data.success){
+            playerLoggedIn = true;
+
+            signDiv.style.display = 'none';
+            gameDiv.style.display = 'block';
+            myCanvas.style.display = 'block';
+            pnlPlayerInfo.style.display = 'block';
+
+            init();
+
+        } else
+            alert("Sign in unsuccessul.");
+    });
+
+    socket.on('signUpResponse',function(data){
+        if(data.success){
+            alert("Sign up successul.");
+        } else
+            alert("Sign up unsuccessul.");
+    });
+
     animate();
 
     /**
@@ -88,7 +129,7 @@
 
         serverDateTime = document.createElement('div');
         createLabel("serverDateTime","serverDateTime","- nenhum -",10,380,serverDateTime);
-
+/*
         createButton("btlogin","Login",50,50,function () {
             var txtbox = document.getElementById('loginName');
             var intLocal = document.getElementById('country').value;
@@ -102,7 +143,6 @@
                 });
 
                 socket.on("newPlayerResponse", function (data) {
-                    playerLoggedIn = data.login;
                     lblPlayersCount.innerHTML = data.playerCount;
 
                     if (playerLoggedIn) {
@@ -129,28 +169,17 @@
                         }
                         document.getElementById('playerName').innerHTML = data.name ;
                         document.getElementById('playerlocal').innerHTML = data.local ;
-                        //createLabel("playerStatus", "playerStatus", data.name + " is logged in " + playerLocal, 80, 20, null);
                     }
 
                 });
 
             }
         });
-
-        createInputField('loginName',50,100);
-
+*/
+       // createInputField('loginName',50,100);
+/*
         createComboBox("country",50,280);
-
-        text3 = document.createElement('div');
-        text3.style.position = 'absolute';
-        //text2.style.zIndex = 1;
-        text3.style.width = 100;
-        text3.style.height = 100;
-        text3.style.backgroundColor = "transparent";
-        text3.style.color ="red";
-        text3.innerHTML = "OFF";
-        text3.style.top = 12 + 'px';
-        text3.style.left = 880 + 'px';
+*/
 
         createButton("CityLights","City Lights",10,800,function() {
 
@@ -172,8 +201,6 @@
         });
 
         document.body.appendChild(text2);
-        document.body.appendChild(text3);
-
     }
 
     /**
@@ -389,7 +416,6 @@
     socket.on("serverStatus", function (data) {
         lblPlayersCount.innerHTML = data.playerCount;
         serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss');
-        //console.log(data.total);
     });
 
     socket.on("playersList", function (data) {
