@@ -82,7 +82,8 @@
         gameDiv.style.display = 'none';
         myCanvas.style.display = 'none';
         pnlPlayerInfo.style.display = 'none';
-        socket.disconnect(true);
+        socket.disconnect();
+        document.location.reload(true); //reload da pagina
     };
 
     btnCityLights.onclick = function(){
@@ -121,6 +122,16 @@
     });
 
     animate();
+
+    socket.on("serverStatus", function (data) {
+        //lblPlayersCount.innerHTML = data.playerCount;
+        //serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss');
+    });
+
+    socket.on("playersList", function (data) {
+        earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
+        createPlayerPositions(data);
+    });
 
     /**
      * Metodo que inicia a cena
@@ -402,16 +413,6 @@
 
         return new THREE.Vector3(x,y,z);
     }
-
-    socket.on("serverStatus", function (data) {
-        lblPlayersCount.innerHTML = data.playerCount;
-        serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss');
-    });
-
-    socket.on("playersList", function (data) {
-        earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
-        createPlayerPositions(data);
-    });
 
 </script>
 </body>
