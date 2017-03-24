@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>World@war pré-alpha</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="css/world@war.css">
 </head>
 <body>
 
@@ -113,7 +113,7 @@
                         var child = document.getElementById("country");
                         child.parentNode.removeChild(child);
 
-                        pnlPlayerInfo.style.display = "inline-block";
+                        pnlPlayerInfo.style.display = "inline-block"; // liga painel
 
                         var playerLocal;
                         switch (data.local) {
@@ -127,9 +127,9 @@
                                 playerLocal = "AU - Australia";
                                 break;
                         }
-                        //document.getElementById("playerName").setAttribute('value',data.name);
                         document.getElementById('playerName').innerHTML = data.name ;
-                        createLabel("playerStatus", "playerStatus", data.name + " is logged in " + playerLocal, 80, 20, null);
+                        document.getElementById('playerlocal').innerHTML = data.local ;
+                        //createLabel("playerStatus", "playerStatus", data.name + " is logged in " + playerLocal, 80, 20, null);
                     }
 
                 });
