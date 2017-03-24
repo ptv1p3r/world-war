@@ -38,6 +38,7 @@ var USERS = {
 Player.list = {};
 Player.onConnect = function(socket,data){
     var player = Player(socket.id);
+    playerCount++;
     player.name = data.username;
     player.local = "40.0#175.0";
 };
@@ -197,8 +198,6 @@ var add_minutes =  function (dt, minutes) {
  * Ciclo de loop
  */
 setInterval(function () {
-
-    //serverDateNow = add_minutes(serverDateNow,1);
     var pack = {
         player:Player.update()
     };

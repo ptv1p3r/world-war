@@ -18,8 +18,8 @@
     <table id ="headerBox" >
         <tbody>
         <tr>
-            <td>1</td>
-            <td>2</td>
+            <td>World@War Server Player's:<div id="playersCount">0</div></td>
+            <td>Server Time:<div id="serverTime"></div></td>
             <td>3</td>
             <td>4</td>
             <td>5</td>
@@ -38,6 +38,7 @@
         <button id="cityLights">City Lights</button>
     </fieldset>
 </div>
+
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script src="js/three.js"></script>
 <script src="js/date.format.js"></script>
@@ -63,7 +64,7 @@
         TERRA_ROTACAO_VELOCIDADE = -0.00001,
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
-    var scene, renderer, camera, cloudMesh, earthMesh, controls, text2, material, bolCityLightsON=false;
+    var scene, renderer, camera, cloudMesh, earthMesh, material, bolCityLightsON=false;
     var lblPlayersCount, playerLoggedIn = false, serverDateTime, globalPlayersList = {}, playersMesh ;
 
     var socket = io(); // inicia conecao pelo socket
@@ -124,13 +125,16 @@
     animate();
 
     socket.on("serverStatus", function (data) {
-        //lblPlayersCount.innerHTML = data.playerCount;
-        //serverDateTime.innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss');
+        document.getElementById('playersCount').innerHTML = data.playerCount;
+        document.getElementById('serverTime').innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss') ;
     });
 
     socket.on("playersList", function (data) {
-        earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
-        createPlayerPositions(data);
+        if (earthMesh != undefined) {
+            earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
+            createPlayerPositions(data);
+        }
+
     });
 
     /**
@@ -163,15 +167,6 @@
         createSkyBox();
 
         window.addEventListener( 'resize', onWindowResize, false );
-
-        createLabel("playerCount","playerCount","World@War Server Player's: ",10,20,null);
-        createLabel("serverDateTime","serverDateTime","Server Date/Time: ",10,250,null);
-
-        lblPlayersCount = document.createElement('div');
-        createLabel("serverPlayersCount","serverPlayersCount","0",10,220,lblPlayersCount);
-
-        serverDateTime = document.createElement('div');
-        createLabel("serverDateTime","serverDateTime","- nenhum -",10,380,serverDateTime);
 /*
         createButton("btlogin","Login",50,50,function () {
             var txtbox = document.getElementById('loginName');
@@ -189,12 +184,6 @@
                     lblPlayersCount.innerHTML = data.playerCount;
 
                     if (playerLoggedIn) {
-                        var child = document.getElementById("btlogin");
-                        child.parentNode.removeChild(child);
-                        var child = document.getElementById("loginName");
-                        child.parentNode.removeChild(child);
-                        var child = document.getElementById("country");
-                        child.parentNode.removeChild(child);
 
                         pnlPlayerInfo.style.display = "inline-block"; // liga painel
 
@@ -229,10 +218,14 @@
     function animate() {
         requestAnimationFrame(animate);
 
-        earthMesh.rotation.y = Date.now() * TERRA_ROTACAO_VELOCIDADE;
-        cloudMesh.rotation.y = Date.now() * NUVENS_ROTACAO_VELOCIDADE;
+        if (earthMesh != undefined) {
+            earthMesh.rotation.y = Date.now() * TERRA_ROTACAO_VELOCIDADE;
+            cloudMesh.rotation.y = Date.now() * NUVENS_ROTACAO_VELOCIDADE;
 
-        render();
+            render();
+        }
+
+
     }
 
     function createEarth() {
