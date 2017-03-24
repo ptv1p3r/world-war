@@ -1,5 +1,5 @@
 var tools = require('./server/initServer');
-var serverDateStart, serverDateNow, serverDateEnd;
+var serverDateStart, serverDateNow;
 var SOCKET_LIST = {}; // lista de ligacoes
 var playerCount = 0;
 
@@ -16,12 +16,15 @@ var CYCLE_TIME = 1000/25;      // tempo em milisegundos para cada ciclo de loop
  */
 var Player = function (id) {
     var self = {
-        name : '',
-        id : id,
-        number : "" + Math.floor(10 * Math.random()),
-        x : 0,
-        y : 0,
-        local : ""
+        name        : '',
+        nickname    : '',
+        id          : id,
+        number      : "" + Math.floor(10 * Math.random()),
+        x           : 0,
+        y           : 0,
+        local       : "",
+        bank        : 0.00,
+        influence   : 0
     };
     Player.list[id] = self;
     return self;
@@ -35,6 +38,7 @@ var USERS = {
     "obo":"1"
 };
 
+// Estrutura de PLAYER
 Player.list = {};
 Player.onConnect = function(socket,data){
     var player = Player(socket.id);
@@ -53,9 +57,11 @@ Player.update = function(){
         var player = Player.list[i];
         //player.update();
         pack.push({
-            id : player.id,
-            name : player.name,
-            local : player.local
+            id          : player.id,
+            name        : player.name,
+            local       : player.local,
+            bank        : player.bank,
+            influence   : player.influence
         });
     }
     return pack;
