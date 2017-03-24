@@ -65,7 +65,7 @@
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
     var scene, renderer, camera, cloudMesh, earthMesh, material, bolCityLightsON=false;
-    var lblPlayersCount, playerLoggedIn = false, serverDateTime, globalPlayersList = {}, playersMesh ;
+    var playerLoggedIn = false, playersMesh ;
 
     var socket = io(); // inicia conecao pelo socket
 
@@ -224,7 +224,6 @@
 
             render();
         }
-
 
     }
 
