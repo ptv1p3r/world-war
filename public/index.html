@@ -44,6 +44,7 @@
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script src="js/three.js"></script>
 <script src="js/date.format.js"></script>
+<script src="js/OrbitControls.js"></script>
 <script>
     var pnlPlayerInfo = document.getElementById("pnlPlayerInfo");
     var signDiv = document.getElementById('signDiv');
@@ -66,7 +67,7 @@
         TERRA_ROTACAO_VELOCIDADE = -0.00001,
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
-    var scene, renderer, camera, cloudMesh, earthMesh, material, bolCityLightsON=false;
+    var scene, renderer, camera, controls, cloudMesh, earthMesh, material, bolCityLightsON=false;
     var playerLoggedIn = false, playersMesh ;
 
     var socket = io(); // inicia conecao pelo socket
@@ -151,6 +152,11 @@
         camera.position.set(0, 100, DISTANCIA_MAX);
         camera.lookAt(scene.position);
 
+        //CAMERA CONTROL
+        controls = new THREE.OrbitControls(camera);
+        controls.maxDistance = DISTANCIA_MAX;
+        controls.minDistance = 150;
+
         //RENDERER
         renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias: true});
         renderer.setClearColor(0x000000);
@@ -223,6 +229,8 @@
         if (earthMesh != undefined) {
             earthMesh.rotation.y = Date.now() * TERRA_ROTACAO_VELOCIDADE;
             cloudMesh.rotation.y = Date.now() * NUVENS_ROTACAO_VELOCIDADE;
+
+            controls.update();
 
             render();
         }
