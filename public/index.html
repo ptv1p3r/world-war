@@ -34,7 +34,8 @@
         <legend>Personal info:</legend>
         Name:  <div id="playerName"></div><br>
         Email: <div id="playerEmail"></div><br>
-        Local: <div id="playerlocal"></div>
+        Local: <div id="playerlocal"></div><br>
+        <button id="cityLights">City Lights</button>
     </fieldset>
 </div>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -45,6 +46,8 @@
     var signDiv = document.getElementById('signDiv');
     var gameDiv = document.getElementById('gameDiv');
     var myCanvas = document.getElementById('myCanvas');
+    var btnLogout = document.getElementById('logOut');
+    var btnCityLights = document.getElementById('cityLights');
     var signDivUsername = document.getElementById('signDiv-username');
     var signDivSignIn = document.getElementById('signDiv-signIn');
     var signDivSignUp = document.getElementById('signDiv-signUp');
@@ -68,8 +71,31 @@
     signDivSignIn.onclick = function(){
         socket.emit('signIn',{username:signDivUsername.value,password:signDivPassword.value});
     };
+
     signDivSignUp.onclick = function(){
         socket.emit('signUp',{username:signDivUsername.value,password:signDivPassword.value});
+    };
+
+    btnLogout.onclick = function(){
+        playerLoggedIn = false;
+        signDiv.style.display = 'block';
+        gameDiv.style.display = 'none';
+        myCanvas.style.display = 'none';
+        pnlPlayerInfo.style.display = 'none';
+        socket.disconnect(true);
+    };
+
+    btnCityLights.onclick = function(){
+        if (bolCityLightsON){
+            earthMesh.material.map = THREE.ImageUtils.loadTexture('images/earthlights1k.jpg');
+        } else {
+            earthMesh.material.map = THREE.ImageUtils.loadTexture('images/earthmap4k.jpg');
+        }
+
+        bolCityLightsON = !bolCityLightsON;
+
+        //cloudMesh.material.needsUpdate = true;
+        earthMesh.material.needsUpdate = true;
     };
 
     socket.on('signInResponse',function(data){
@@ -182,29 +208,7 @@
             }
         });
 */
-       // createInputField('loginName',50,100);
-/*
-        createComboBox("country",50,280);
-*/
 
-        createButton("CityLights","City Lights",10,800,function() {
-
-            if (bolCityLightsON){
-                earthMesh.material.map = THREE.ImageUtils.loadTexture('images/earthlights1k.jpg');
-                text3.style.color ="lightgreen";
-                text3.innerHTML = "ON";
-            } else {
-                earthMesh.material.map = THREE.ImageUtils.loadTexture('images/earthmap4k.jpg');
-                text3.style.color ="red";
-                text3.innerHTML = "OFF";
-            }
-
-            bolCityLightsON = !bolCityLightsON;
-
-            //cloudMesh.material.needsUpdate = true;
-            earthMesh.material.needsUpdate = true;
-
-        });
 
     }
 
