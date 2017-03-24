@@ -65,6 +65,7 @@
         NEAR = 0.1,
         FAR = 10000,
         DISTANCIA_MAX = 1000,
+        DISTANCIA_MIN = 500,
         TERRA_ROTACAO_VELOCIDADE = -0.00001,
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
@@ -156,7 +157,7 @@
         //CAMERA CONTROL
         controls = new THREE.OrbitControls(camera);
         controls.maxDistance = DISTANCIA_MAX;
-        controls.minDistance = 150;
+        controls.minDistance = DISTANCIA_MIN;
 
         //RENDERER
         renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias: true});
