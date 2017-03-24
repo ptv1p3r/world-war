@@ -11,6 +11,11 @@ canvas {
 
 a {color: #00B7FF;}
 
+#headerBox {
+    position: absolute;
+    width: 100%;
+}
+
 #pnlPlayerInfo {
     position: absolute;
     top: 70px;
