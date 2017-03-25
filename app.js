@@ -25,7 +25,7 @@ var CYCLE_TIME = 1000/25;      // tempo em milisegundos para cada ciclo de loop
 var Countries = function (id,name) {
     var self = {
         id      :  id,
-        Name    :   name
+        name    :   name
     };
     Countries.list[id] = self;
 
@@ -147,14 +147,22 @@ io.sockets.on('connection', function (socket) {
                 Player.onConnect(socket,data); // adiciona player
                 socket.emit('signInResponse',{success:true}); // responde ao cliente
 
+                getCountries(data,function(res) {
+                    if (res){
+                        pack = {
+                            country : Countries.update()
+                        };
+                        console.log(pack);
+                        socket.emit('countriesList',pack);
+                    }
+                });
+
                 console.log("Player: " + data.username + " added!");
             } else {
                 socket.emit('signInResponse',{success:false}); // responde ao cliente
             }
         });
     });
-
-
 
     socket.on('signUp',function(data){
         isUsernameTaken(data,function(res){
@@ -182,7 +190,7 @@ io.sockets.on('connection', function (socket) {
         console.log('player deleted' + ' id: ' + socket.id);
     });
 
-
+/*
     getCountries(function (res) {
         if (res){
             pack = {
@@ -191,7 +199,7 @@ io.sockets.on('connection', function (socket) {
             socket.emit('countriesList',pack);
         }
     });
-
+*/
     /*
     socket.on("newPlayer", function (data) {
         if (!playerExists) {
@@ -306,13 +314,15 @@ var getUser = function(data,cb) {
     });
 };
 
-var getCountries = function(cb) {
+var getCountries = function(data,cb) {
     db.serialize(function() {
-        db.each("SELECT countryId, countryName FROM Countries", function(err, row) {
-            country = Countries(row.countryId, row.countryName); // inicia novo pais
-            Countries.list[country.id] = country;
+        db.all("SELECT countryId, countryName FROM Countries", function(err, row) {
+            for (var i = 0; i < row.length;i++){
+                country = Countries(row[i].countryId, row[i].countryName); // inicia novo pais
+                Countries.list[country.id] = country;
+            }
+            cb(true);
         });
-        cb(true);
     });
 };
 

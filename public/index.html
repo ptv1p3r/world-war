@@ -255,13 +255,14 @@
         //var options = ["1", "2", "3", "4", "5"];
 
         socket.on("countriesList", function (countriesList) {
-            for(var i = 0; i < countriesList.length; i++) {
+            console.log("country" + countriesList.length );
+         /*   for(var i = 0; i < countriesList.length; i++) {
                 var opt = countriesList[i];
                 var el = document.createElement("option");
-                el.textContent = opt;
-                el.value = opt;
+                el.textContent = opt.name;
+                el.value = opt.id;
                 countries.appendChild(el);
-            }
+            }*/
         });
 
         countries.onmouseover = function () { // desligar os orbitcontrols no elemento html
