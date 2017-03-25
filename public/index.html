@@ -79,6 +79,7 @@
         Country: <div id="playerEmail"></div><br>
         Status: <div id="playerlocal"></div><br>
         <button id="cityLights">City Lights</button>
+        <select id="countries"></select>
     </fieldset>
 </div>
 
@@ -196,10 +197,6 @@
         camera.position.set(0, 100, DISTANCIA_MAX);
         camera.lookAt(scene.position);
 
-        //CAMERA CONTROL
-        controls = new THREE.OrbitControls(camera);
-        controls.maxDistance = DISTANCIA_MAX;
-        controls.minDistance = DISTANCIA_MIN;
 
         //RENDERER
         renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias: true});
@@ -208,11 +205,17 @@
         renderer.setSize(WIDTH, HEIGHT);
         document.body.appendChild(renderer.domElement);
 
+        //CAMERA CONTROL
+        controls = new THREE.OrbitControls(camera);
+        //controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.maxDistance = DISTANCIA_MAX;
+        controls.minDistance = DISTANCIA_MIN;
+
         //LIGHTS
         var light = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(light);
 
-        //createCountries();
+        createCountries();
 
         //createGpsPositions();
 
@@ -246,11 +249,43 @@
         }
 
     }
-/*
+
     function createCountries(){
-        socket.on("countriesList", function (countriesList) {
+        var countries = document.getElementById("countries");
+        var options = ["1", "2", "3", "4", "5"];
+
+        for(var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            var el = document.createElement("option");
+            el.textContent = opt;
+            el.value = opt;
+            countries.appendChild(el);
+            //countries.add(el,countries.options[i]);
+        }
+
+        countries.onmouseover = function () { // desligar os orbitcontrols no elemento html
+            controls.enabled =false;
+        };
+        countries.onmouseout = function () { // ligar os orbitcontrols no elemento html
+            controls.enabled =true;
+        }
+
+    }
+/*        socket.on("countriesList", function (countriesList) {
             //document.getElementById('playersCount').innerHTML = data.playerCount;
             //document.getElementById('serverTime').innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss') ;
+
+
+             var select = document.getElementById("selectNumber");
+             var options = ["1", "2", "3", "4", "5"];
+
+             for(var i = 0; i < options.length; i++) {
+             var opt = options[i];
+             var el = document.createElement("option");
+             el.textContent = opt;
+             el.value = opt;
+             select.appendChild(el);
+             }​
         });
     }*/
 
