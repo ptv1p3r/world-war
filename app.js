@@ -152,7 +152,6 @@ io.sockets.on('connection', function (socket) {
                         pack = {
                             country : Countries.update()
                         };
-                        console.log(pack);
                         socket.emit('countriesList',pack);
                     }
                 });

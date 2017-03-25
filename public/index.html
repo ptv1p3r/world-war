@@ -257,7 +257,6 @@
     function createCountries(){
         var countries = document.getElementById("countries");
         socket.on("countriesList", function (data) {
-            console.log("country" + data.country.length );
             for(var i = 0; i < data.country.length; i++) {
                 var opt = data.country[i];
                 var el = document.createElement("option");
