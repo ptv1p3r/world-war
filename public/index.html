@@ -35,8 +35,8 @@
     <fieldset>
         <legend>Personal info:</legend>
         Name:  <div id="playerName"></div><br>
-        Email: <div id="playerEmail"></div><br>
-        Local: <div id="playerlocal"></div><br>
+        Country: <div id="playerEmail"></div><br>
+        Status: <div id="playerlocal"></div><br>
         <button id="cityLights">City Lights</button>
     </fieldset>
 </div>
@@ -197,18 +197,7 @@
 
                         pnlPlayerInfo.style.display = "inline-block"; // liga painel
 
-                        var playerLocal;
-                        switch (data.local) {
-                            case '1':
-                                playerLocal = "EU - Europe";
-                                break;
-                            case '2':
-                                playerLocal = "AF - Africa";
-                                break;
-                            case '3':
-                                playerLocal = "AU - Australia";
-                                break;
-                        }
+
                         document.getElementById('playerName').innerHTML = data.name ;
                         document.getElementById('playerlocal').innerHTML = data.local ;
                     }
