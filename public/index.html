@@ -170,6 +170,8 @@
         var light = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(light);
 
+        createPlayer();
+
         createEarth();
 
         createEarthClouds();
@@ -177,6 +179,9 @@
         createSkyBox();
 
         window.addEventListener( 'resize', onWindowResize, false );
+
+
+
 /*
         createButton("btlogin","Login",50,50,function () {
             var txtbox = document.getElementById('loginName');
@@ -294,6 +299,12 @@
         playersMesh.name = 'playersMesh';
 
         earthMesh.add(playersMesh);
+    }
+
+    function createPlayer(){
+        socket.on("playerProfile", function (data) {
+            document.getElementById('playerName').innerHTML = data.name;
+        });
     }
 
     /**

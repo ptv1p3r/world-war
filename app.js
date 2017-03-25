@@ -4,6 +4,7 @@ var tools = require('./server/initServer');
 var serverDateStart, serverDateNow;
 var SOCKET_LIST = {}; // lista de ligacoes
 var playerCount = 0;
+var player;
 
 var fs = require("fs");
 var file = "./server/w@w.db";
@@ -50,23 +51,20 @@ var Player = function (id) {
 Player.list = {};
 
 Player.onConnect = function(socket,data){
-    var player = Player(socket.id); // novo jogador
-    db.serialize(function() {
-        db.all("SELECT playerId, playerName, playerEmail, playerPassword, playerUser, playerLastLogin, countryId AS playerCountryId, playerBalance FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
-            player.number      = row[0].playerId        ;
-            player.name        = row[0].playerName      ;
-            player.email       = row[0].playerEmail     ;
-            player.password    = row[0].playerPassword  ;
-            player.x           = 0                      ;
-            player.y           = 0                      ;
-            player.user        = row[0].playerUser      ;
-            player.lastLogin   = row[0].playerLastLogin ;
-            player.countryId   = row[0].playerCountryId ;
-            player.balance     = row[0].playerBalance   ;
-        });
+    player = Player(socket.id); // novo jogador
+    getUser(data,function (res) {
+        if (res){
+            Player.list[socket.id] = player;
+            playerCount++;
+
+            socket.emit('playerProfile',{
+                name : player.name,
+                user : player.user
+            });
+        }
     });
-    playerCount++;
 };
+
 Player.onDisconnect = function(socket){
     delete Player.list[socket.id];
 };
@@ -78,9 +76,8 @@ Player.update = function(){
         //player.update();
         pack.push({
             id          : player.id,
-            name        : player.name,
-            user        : player.user,
-            balance     : player.balance,
+            number        : player.number,
+            balance     : player.balance
         });
     }
     return pack;
@@ -137,6 +134,8 @@ io.sockets.on('connection', function (socket) {
             }
         });
     });
+
+
 
     /**
      * Metodo automatico que valida o disconect do socket pelo cliente
@@ -248,6 +247,23 @@ var addUser = function(data,cb){
     cb();
 };
 
+var getUser = function(data,cb) {
+    db.serialize(function() {
+        db.get("SELECT playerId, playerName, playerEmail, playerPassword, playerUser, playerLastLogin, countryId AS playerCountryId, playerBalance FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
+            player.number      = row.playerId        ;
+            player.name        = row.playerName      ;
+            player.email       = row.playerEmail     ;
+            player.password    = row.playerPassword  ;
+            player.x           = 0                   ;
+            player.y           = 0                   ;
+            player.user        = row.playerUser      ;
+            player.lastLogin   = row.playerLastLogin ;
+            player.countryId   = row.playerCountryId ;
+            player.balance     = row.playerBalance   ;
+            cb(true);
+        });
+    });
+};
 /**
  * Ciclo de loop
  */
