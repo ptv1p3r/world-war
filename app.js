@@ -182,6 +182,7 @@ io.sockets.on('connection', function (socket) {
         console.log('player deleted' + ' id: ' + socket.id);
     });
 
+    /*
     getCountries(function (res) {
         if (res){
             pack = {
@@ -189,7 +190,7 @@ io.sockets.on('connection', function (socket) {
             };
             socket.emit('countriesList',pack);
         }
-    });
+    });*/
 
     /*
     socket.on("newPlayer", function (data) {
