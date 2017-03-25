@@ -1,7 +1,21 @@
+const crypto = require('crypto');
+const secret = 'world@war';
 var tools = require('./server/initServer');
 var serverDateStart, serverDateNow;
 var SOCKET_LIST = {}; // lista de ligacoes
 var playerCount = 0;
+
+var fs = require("fs");
+var file = "./server/w@w.db";
+var exists = fs.existsSync(file);
+
+if(!exists) {
+    console.log("Creating DB file.");
+    fs.openSync(file, "w");
+}
+
+var sqlite3 = require("sqlite3").verbose();
+var db = new sqlite3.Database(file);
 
 // 40ms = 1000/25
 // 60s  = 60 * 1000
@@ -29,14 +43,6 @@ var Player = function (id) {
     Player.list[id] = self;
     return self;
 }
-
-var USERS = {
-    //username:password
-    "viper":"123",
-    "slyer":"123",
-    "bob":"1",
-    "obo":"1"
-};
 
 // Estrutura de PLAYER
 Player.list = {};
@@ -66,6 +72,14 @@ Player.update = function(){
     }
     return pack;
 };
+
+/*
+try {
+
+} catch (err) {
+    console.log('crypto support is disabled!');
+}
+*/
 
 // Setup do servidor
 var app = tools.initServer();
@@ -174,26 +188,48 @@ io.sockets.on('connection', function (socket) {
 });
 
 
-
-
-
 var isValidPassword = function(data,cb){
-    setTimeout(function(){
-        cb(USERS[data.username] === data.password);
-    },10);
+    const hash = crypto.createHmac('sha256', secret)
+        .update(data.password)
+        .digest('hex');
+
+    db.serialize(function() {
+        db.all("SELECT playerPassword FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
+            if(row.length > 0){
+                if (hash == row[0].playerPassword){
+                    cb(true);
+                }
+            } else {
+                cb(false);
+            }
+        });
+    });
+   // db.close();
 };
 
 var isUsernameTaken = function(data,cb){
-    setTimeout(function(){
-        cb(USERS[data.username]);
-    },10);
+    db.serialize(function() {
+        db.all("SELECT playerId AS id FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
+            if(row.length > 0){
+                cb(true);
+            } else {
+                cb(false);
+            }
+        });
+    });
+    //db.close();
 };
 
 var addUser = function(data,cb){
-    setTimeout(function(){
-        USERS[data.username] = data.password;
-        cb();
-    },10);
+    const hash = crypto.createHmac('sha256', secret)
+        .update(data.password)
+        .digest('hex');
+
+    db.serialize(function() {
+        db.run("INSERT INTO Player(playerName, playerEmail, playerPassword, playerUser) VALUES ('f','f','" + hash + "','" + data.username + "')");
+    });
+    //db.close();
+    cb();
 };
 
 var add_minutes =  function (dt, minutes) {
