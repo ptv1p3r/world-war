@@ -147,7 +147,7 @@ io.sockets.on('connection', function (socket) {
                 Player.onConnect(socket,data); // adiciona player
                 socket.emit('signInResponse',{success:true}); // responde ao cliente
 
-                getCountries(data,function(res) {
+                getCountries(data,function(res) { // envia lista de paises
                     if (res){
                         pack = {
                             country : Countries.update()

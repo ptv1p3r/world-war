@@ -87,6 +87,7 @@
 <script src="js/three.js"></script>
 <script src="js/date.format.js"></script>
 <script src="js/OrbitControls.js"></script>
+
 <script>
     var pnlPlayerInfo = document.getElementById("pnlPlayerInfo");
     var playerName = document.getElementById("playerName");
@@ -113,7 +114,7 @@
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
     var scene, renderer, camera, controls, cloudMesh, earthMesh, material, bolCityLightsON=false;
-    var playerLoggedIn = false, playersMesh ;
+    var playerLoggedIn = false, playersMesh;
 
     var socket = io(); // inicia conecao pelo socket
 
@@ -185,6 +186,7 @@
 
     });
 
+
     /**
      * Metodo que inicia a cena
      */
@@ -231,6 +233,8 @@
 
         window.addEventListener( 'resize', onWindowResize, false );
 
+
+
     }
 
     /**
@@ -252,17 +256,15 @@
 
     function createCountries(){
         var countries = document.getElementById("countries");
-        //var options = ["1", "2", "3", "4", "5"];
-
-        socket.on("countriesList", function (countriesList) {
-            console.log("country" + countriesList.length );
-         /*   for(var i = 0; i < countriesList.length; i++) {
-                var opt = countriesList[i];
+        socket.on("countriesList", function (data) {
+            console.log("country" + data.country.length );
+            for(var i = 0; i < data.country.length; i++) {
+                var opt = data.country[i];
                 var el = document.createElement("option");
                 el.textContent = opt.name;
                 el.value = opt.id;
                 countries.appendChild(el);
-            }*/
+            }
         });
 
         countries.onmouseover = function () { // desligar os orbitcontrols no elemento html
