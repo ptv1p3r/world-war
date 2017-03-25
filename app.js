@@ -46,20 +46,24 @@ var Player = function (id) {
     Player.list[id] = self;
 
     return self;
-}
+};
 
 Player.list = {};
 
 Player.onConnect = function(socket,data){
-    player = Player(socket.id); // novo jogador
+    player = Player(socket.id); // inicia novo player
     getUser(data,function (res) {
         if (res){
             Player.list[socket.id] = player;
             playerCount++;
 
             socket.emit('playerProfile',{
-                name : player.name,
-                user : player.user
+                id          : player.number,
+                name        : player.name,
+                user        : player.user,
+                lastlogin   : player.lastLogin,
+                balance     : player.balance,
+                countryid   : player.countryId
             });
         }
     });
@@ -111,14 +115,14 @@ io.sockets.on('connection', function (socket) {
     SOCKET_LIST[socket.id] = socket; // guarda ligacao na lista
 
     socket.on('signIn',function(data){
-        isValidPassword(data,function(res){
+        isValidPassword(data,function(res){ //valida password
             if(res){
-                Player.onConnect(socket,data);
-                socket.emit('signInResponse',{success:true});
+                Player.onConnect(socket,data); // adiciona player
+                socket.emit('signInResponse',{success:true}); // responde ao cliente
 
                 console.log("Player: " + data.username + " added!");
             } else {
-                socket.emit('signInResponse',{success:false});
+                socket.emit('signInResponse',{success:false}); // responde ao cliente
             }
         });
     });
@@ -134,8 +138,6 @@ io.sockets.on('connection', function (socket) {
             }
         });
     });
-
-
 
     /**
      * Metodo automatico que valida o disconect do socket pelo cliente
@@ -249,7 +251,7 @@ var addUser = function(data,cb){
 
 var getUser = function(data,cb) {
     db.serialize(function() {
-        db.get("SELECT playerId, playerName, playerEmail, playerPassword, playerUser, playerLastLogin, countryId AS playerCountryId, playerBalance FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
+        db.get("SELECT playerId, playerName, playerEmail, playerPassword, playerUser, countryId AS playerCountryId, playerBalance FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
             player.number      = row.playerId        ;
             player.name        = row.playerName      ;
             player.email       = row.playerEmail     ;
@@ -257,7 +259,7 @@ var getUser = function(data,cb) {
             player.x           = 0                   ;
             player.y           = 0                   ;
             player.user        = row.playerUser      ;
-            player.lastLogin   = row.playerLastLogin ;
+            player.lastLogin   = new Date()          ;
             player.countryId   = row.playerCountryId ;
             player.balance     = row.playerBalance   ;
             cb(true);
