@@ -23,6 +23,13 @@ a {color: #00B7FF;}
 }
 #headerBox tr { line-height: 10px; }
 
+#leftHeaderBox {
+    position: absolute;
+    width: 100%;
+    color: darkgrey;
+    /*    white-space:nowrap;*/
+}
+
 #footerBox {
     position: absolute;
     bottom:0px;
@@ -33,7 +40,7 @@ a {color: #00B7FF;}
 
 #pnlPlayerInfo {
     position: absolute;
-    top: 70px;
+    top: 100px;
     left: 10px;
     width: 200px;
     /*border: 3px solid #73AD21;*/

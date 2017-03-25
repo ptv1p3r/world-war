@@ -212,6 +212,8 @@
         var light = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(light);
 
+        createCountries();
+
         createPlayer();
 
         createEarth();
@@ -239,6 +241,13 @@
             render();
         }
 
+    }
+
+    function createCountries(){
+        socket.on("countriesList", function (countriesList) {
+            //document.getElementById('playersCount').innerHTML = data.playerCount;
+            //document.getElementById('serverTime').innerHTML = dateFormat(data.timestamp,'yyyy-mm-dd HH:MM:ss') ;
+        });
     }
 
     function createEarth() {
@@ -313,7 +322,6 @@
         socket.on("playerProfile", function (player) {
             document.getElementById('playerName').innerHTML = player.name;
             document.getElementById('playerBalance').innerHTML = player.balance;
-
         });
     }
 
@@ -369,13 +377,12 @@
         document.body.appendChild(field);
     }
 
-    function createComboBox(id, x, y) {
+    function createComboBox(id,) {
         var combo_box = document.createElement('select');
         combo_box.name = id;
         combo_box.id = id;
-        combo_box.style.position = 'absolute';
-        combo_box.style.top = x + 'px';
-        combo_box.style.left = y + 'px';
+        combo_box.style.top = '0px';
+        combo_box.style.left = '0px';
 
         var choice = document.createElement('option');
         choice.value = '1';

@@ -4,7 +4,7 @@ var tools = require('./server/initServer');
 var serverDateStart, serverDateNow;
 var SOCKET_LIST = {}; // lista de ligacoes
 var playerCount = 0;
-var player;
+var player, country, pack;
 
 var fs = require("fs");
 var file = "./server/w@w.db";
@@ -21,6 +21,31 @@ var db = new sqlite3.Database(file);
 // 40ms = 1000/25
 // 60s  = 60 * 1000
 var CYCLE_TIME = 1000/25;      // tempo em milisegundos para cada ciclo de loop
+
+var Countries = function (id,name) {
+    var self = {
+        id      :  id,
+        Name    :   name
+    };
+    Countries.list[id] = self;
+
+    return self;
+};
+
+Countries.list = {};
+
+Countries.update = function(){
+    var pack = [];
+    for(var i in Countries.list){
+        var country = Countries.list[i];
+        pack.push({
+            id         : country.id,
+            name       : country.name
+        });
+    }
+    return pack;
+};
+
 
 /**
  * Classe para jogador
@@ -51,6 +76,7 @@ var Player = function (id) {
 Player.list = {};
 
 Player.onConnect = function(socket,data){
+
     player = Player(socket.id); // inicia novo player
     getUser(data,function (res) {
         if (res){
@@ -67,6 +93,7 @@ Player.onConnect = function(socket,data){
             });
         }
     });
+
 };
 
 Player.onDisconnect = function(socket){
@@ -80,7 +107,7 @@ Player.update = function(){
         //player.update();
         pack.push({
             id          : player.id,
-            number        : player.number,
+            number      : player.number,
             balance     : player.balance
         });
     }
@@ -127,6 +154,8 @@ io.sockets.on('connection', function (socket) {
         });
     });
 
+
+
     socket.on('signUp',function(data){
         isUsernameTaken(data,function(res){
             if(res){
@@ -151,7 +180,16 @@ io.sockets.on('connection', function (socket) {
         }
 
         console.log('player deleted' + ' id: ' + socket.id);
-    })
+    });
+
+    getCountries(function (res) {
+        if (res){
+            pack = {
+                country : Countries.update()
+            };
+            socket.emit('countriesList',pack);
+        }
+    });
 
     /*
     socket.on("newPlayer", function (data) {
@@ -266,6 +304,18 @@ var getUser = function(data,cb) {
         });
     });
 };
+
+var getCountries = function(cb) {
+    db.serialize(function() {
+        db.each("SELECT countryId, countryName FROM Countries", function(err, row) {
+            country = Countries(row.countryId, row.countryName); // inicia novo pais
+            Countries.list[country.id] = country;
+        });
+        cb(true);
+    });
+};
+
+
 /**
  * Ciclo de loop
  */
