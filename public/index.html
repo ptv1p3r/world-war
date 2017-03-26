@@ -104,6 +104,17 @@
     var pnlChatForm = document.getElementById('Chat-Form');
     var pnlChatInput= document.getElementById('Chat-Input');
 
+    class Player {
+        constructor(id,name,user,countryid,balance,gpspositionsid){
+            this.id             = id;
+            this.name           = name;
+            this.user           = user;
+            this.countryid      = countryid;
+            this.balance        = balance;
+            this.gpspositionsid = gpspositionsid;
+        };
+    }
+
     var WIDTH = window.innerWidth,
         HEIGHT = window.innerHeight,
         VIEW_ANGLE = 45,
@@ -116,9 +127,9 @@
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
     var scene, renderer, camera, controls, cloudMesh, earthMesh, material, bolCityLightsON=false;
-    var playerLoggedIn = false, playersMesh, countryId, gpsPositionsList = {}, playerGpsLocationId, playerUser;
+    var playerLoggedIn = false, playersMesh, gpsPositionsList = {}, playerProfile;
 
-    var socket = io(); // inicia conecao pelo socket
+    socket = io(); // inicia conecao pelo socket
 
     signDivSignIn.onclick = function(){
         socket.emit('signIn',{username:signDivUsername.value,password:signDivPassword.value});
@@ -187,7 +198,7 @@
         if (earthMesh != undefined) {
             earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
             createPlayerPositions(data);
-            document.getElementById('playerLocation').innerHTML = getPlayerLocation(playerGpsLocationId);
+            document.getElementById('playerLocation').innerHTML = getPlayerLocation(playerProfile.gpspositionsid);
         }
     });
 
@@ -274,7 +285,7 @@
         pnlChatForm.onsubmit = function (e) { // evento de envio para o servidor
             e.preventDefault(); // para nao fazer refresh da pagina com o enter
             socket.emit('senChatMsgToServer',{ // envia para o servidor
-                user : playerUser,
+                user : playerProfile.user,
                 msg  : pnlChatInput.value
             });
             pnlChatInput.value = ''; // limpa no final
@@ -296,7 +307,8 @@
                 el.textContent = opt.name;
                 el.name = opt.id;
                 el.value = opt.id;
-                if (opt.id==countryId){ // seleciona o pais do player
+
+                if (opt.id==playerProfile.countryid){ // seleciona o pais do player
                     el.selected = true;
                 }
                 countries.appendChild(el);
@@ -374,7 +386,9 @@
                     cube.lookAt( new THREE.Vector3(0,0,0) );
 
                     // merge dos marcadores com a mesh pai
-                    THREE.GeometryUtils.merge(geom,cube);
+                    //THREE.GeometryUtils.merge(geom,cube);
+                    cube.updateMatrix();
+                    geom.merge(cube.geometry,cube.matrix);
                 }
             }
         }
@@ -387,11 +401,10 @@
 
     function createPlayer(){
         socket.on("playerProfile", function (player) {
-            document.getElementById('playerName').innerHTML = player.name;
-            document.getElementById('playerBalance').innerHTML = player.balance;
-            countryId = player.countryid;
-            playerGpsLocationId = player.gpspositionsid;
-            playerUser = player.user;
+            playerProfile = new Player(player.id,player.name,player.user,player.countryid,player.balance,player.gpspositionsid);
+
+            document.getElementById('playerName').innerHTML = playerProfile.name;
+            document.getElementById('playerBalance').innerHTML = playerProfile.balance;
         });
 
     }

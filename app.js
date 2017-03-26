@@ -187,63 +187,6 @@ io.sockets.on('connection', function (socket) {
         console.log('player deleted' + ' id: ' + socket.id);
     });
 
-/*
-    getCountries(function (res) {
-        if (res){
-            pack = {
-                country : Countries.update()
-            };
-            socket.emit('countriesList',pack);
-        }
-    });
-*/
-    /*
-    socket.on("newPlayer", function (data) {
-        if (!playerExists) {
-            var player = Player(socket.id); // cria novo player
-            player.name = data.name;
-
-            switch (data.local){
-                case '1':
-                    player.local = "40.0#175.0"; //EU
-                    //player.local = "-10.0#120.0"; //BR
-                    //player.local = "40.0#80.0"; //USA
-                    break;
-                case '2':
-                    player.local = "20.0#175.0"; //AF
-                    break;
-                case '3':
-                    player.local = "-26.0#311.0"; //AU
-                    break;
-            }
-
-            //PLAYERS_LIST[socket.id] = player;
-            //playerCount++;
-
-            socket.emit('newPlayerResponse',{
-                login       : true,
-                id          : socket.id,
-                name        : player.name,
-                playerCount : playerCount,
-                local       : player.local
-            });
-
-            var pack = [];
-            for (var i in PLAYERS_LIST){
-                var player = PLAYERS_LIST[i];
-                pack.push({
-                    id : player.id,
-                    name : player.name,
-                    local : player.local
-                });
-            }
-
-            socket.emit('playersList',pack);
-
-        }
-
-    });
-*/
     console.log('new socket connection' + ' id: ' + socket.id + " ip: " + socket.ip);
 
 });
