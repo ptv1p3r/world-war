@@ -114,7 +114,7 @@
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
     var scene, renderer, camera, controls, cloudMesh, earthMesh, material, bolCityLightsON=false;
-    var playerLoggedIn = false, playersMesh, countryId;
+    var playerLoggedIn = false, playersMesh, countryId, gpsPositionsList = {};
 
     var socket = io(); // inicia conecao pelo socket
 
@@ -217,10 +217,7 @@
         var light = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(light);
 
-
-
-
-        //createGpsPositions();
+        createGpsPositions();
 
         //createPlayerPositions();
 
@@ -253,6 +250,13 @@
             render();
         }
 
+    }
+
+    function createGpsPositions(){
+        socket.on("gpsPositionsList", function (data) {
+            gpsPositionsList = data.gpspoints;
+            //console.log(gpsPositionsList) ;
+        });
     }
 
     function createCountries(){
@@ -321,14 +325,20 @@
 
     function createPlayerPositions(playersList) {
         var geom = new THREE.Geometry();
+        var position;
+
         //var geom = new THREE.SphereGeometry(180,32,32);
-        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
+        var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
         var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
 
-        for (var i= 0; i < playersList.length; i++){
-            var d = playersList[i].local.split("#");
+        for (var i= 0; i < playersList.player.length; i++){
 
-            var position = latLongToVector3(d[0], d[1], 175);
+            for (var g=0; g < gpsPositionsList.length; g++) {
+
+                if(playersList.player[i].gpspositionsid == gpsPositionsList[g].id){
+                    position = latLongToVector3(gpsPositionsList[g].lat, gpsPositionsList[g].lon, 175);
+                }
+            }
 
             // create the cube
             var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
@@ -342,7 +352,6 @@
 
         }
 
-        //var total = new THREE.Mesh(geom,new THREE.MeshFaceMaterial());
         playersMesh = new THREE.Mesh(geom,cubeMat);
         playersMesh.name = 'playersMesh';
 
@@ -354,7 +363,6 @@
             document.getElementById('playerName').innerHTML = player.name;
             document.getElementById('playerBalance').innerHTML = player.balance;
             countryId = player.countryid;
-            console.log(countryId);
         });
 
     }

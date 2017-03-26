@@ -22,6 +22,36 @@ var db = new sqlite3.Database(file);
 // 60s  = 60 * 1000
 var CYCLE_TIME = 1000/25;      // tempo em milisegundos para cada ciclo de loop
 
+var GpsPositions = function (id,name,lat,lon,countryId) {
+    var self = {
+        id          : id,
+        name        : name,
+        lat         : lat,
+        lon         : lon,
+        countryid   : countryId
+    };
+    GpsPositions.list[id] = self;
+
+    return self;
+};
+
+GpsPositions.list = {};
+
+GpsPositions.update = function(){
+    var pack = [];
+    for(var i in GpsPositions.list){
+        var gpsPositions = GpsPositions.list[i];
+        pack.push({
+            id          : gpsPositions.id,
+            name        : gpsPositions.name,
+            lat         : gpsPositions.lat,
+            lon         : gpsPositions.lon,
+            countryid   : gpsPositions.countryid
+        });
+    }
+    return pack;
+};
+
 var Countries = function (id,name) {
     var self = {
         id      :  id,
@@ -46,7 +76,6 @@ Countries.update = function(){
     return pack;
 };
 
-
 /**
  * Classe para jogador
  * @param id
@@ -56,17 +85,18 @@ Countries.update = function(){
  */
 var Player = function (id) {
     var self = {
-        id          : id    ,
-        name        : ''    ,
-        email       : ''    ,
-        password    : ''    ,
-        number      : 0     ,
-        x           : 0     ,
-        y           : 0     ,
-        user        : ''    ,
-        lastLogin   : 0.00  ,
-        countryId   : 0     ,
-        balance     : 0.00
+        id              : id    ,
+        name            : ''    ,
+        email           : ''    ,
+        password        : ''    ,
+        number          : 0     ,
+        x               : 0     ,
+        y               : 0     ,
+        user            : ''    ,
+        lastlogin       : 0.00  ,
+        countryid       : 0     ,
+        balance         : 0.00  ,
+        gpspositionsid  : 0
     };
     Player.list[id] = self;
 
@@ -84,12 +114,13 @@ Player.onConnect = function(socket,data){
             playerCount++;
 
             socket.emit('playerProfile',{
-                id          : player.number,
-                name        : player.name,
-                user        : player.user,
-                lastlogin   : player.lastLogin,
-                balance     : player.balance,
-                countryid   : player.countryId
+                id              : player.number,
+                name            : player.name,
+                user            : player.user,
+                lastlogin       : player.lastlogin,
+                balance         : player.balance,
+                countryid       : player.countryid,
+                gpspositionsid  : player.gpspositionsid
             });
         }
     });
@@ -106,9 +137,10 @@ Player.update = function(){
         var player = Player.list[i];
         //player.update();
         pack.push({
-            id          : player.id,
-            number      : player.number,
-            balance     : player.balance
+            id              : player.id,
+            number          : player.number,
+            balance         : player.balance,
+            gpspositionsid  : player.gpspositionsid
         });
     }
     return pack;
@@ -153,6 +185,15 @@ io.sockets.on('connection', function (socket) {
                             country : Countries.update()
                         };
                         socket.emit('countriesList',pack);
+                    }
+                });
+
+                getGpsPositions(data,function(res) { // envia lista de gps points
+                    if (res){
+                        pack = {
+                            gpspoints : GpsPositions.update()
+                        };
+                        socket.emit('gpsPositionsList',pack);
                     }
                 });
 
@@ -297,17 +338,18 @@ var addUser = function(data,cb){
 
 var getUser = function(data,cb) {
     db.serialize(function() {
-        db.get("SELECT playerId, playerName, playerEmail, playerPassword, playerUser, countryId AS playerCountryId, playerBalance FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
-            player.number      = row.playerId        ;
-            player.name        = row.playerName      ;
-            player.email       = row.playerEmail     ;
-            player.password    = row.playerPassword  ;
-            player.x           = 0                   ;
-            player.y           = 0                   ;
-            player.user        = row.playerUser      ;
-            player.lastLogin   = new Date()          ;
-            player.countryId   = row.playerCountryId ;
-            player.balance     = row.playerBalance   ;
+        db.get("SELECT playerId, playerName, playerEmail, playerPassword, playerUser, countryId AS playerCountryId, playerBalance, gpsPositionsId FROM Player WHERE playerUser LIKE '" + data.username + "'", function(err, row) {
+            player.number           = row.playerId        ;
+            player.name             = row.playerName      ;
+            player.email            = row.playerEmail     ;
+            player.password         = row.playerPassword  ;
+            player.x                = 0                   ;
+            player.y                = 0                   ;
+            player.user             = row.playerUser      ;
+            player.lastlogin        = new Date()          ;
+            player.countryid        = row.playerCountryId ;
+            player.balance          = row.playerBalance   ;
+            player.gpspositionsid   = row.gpsPositionsId  ;
             cb(true);
         });
     });
@@ -319,6 +361,17 @@ var getCountries = function(data,cb) {
             for (var i = 0; i < row.length;i++){
                 country = Countries(row[i].countryId, row[i].countryName); // inicia novo pais
                 Countries.list[country.id] = country;
+            }
+            cb(true);
+        });
+    });
+};
+
+var getGpsPositions = function(data,cb) {
+    db.serialize(function() {
+        db.all("SELECT gpsPositionsId, gpsPositionsName, gpsPositionsLat, gpsPositionsLon, countryId FROM gpsPositions", function(err, row) {
+            for (var i = 0; i < row.length;i++){
+                GpsPositions(row[i].gpsPositionsId, row[i].gpsPositionsName, row[i].gpsPositionsLat,row[i].gpsPositionsLon,row[i].countryId); // inicia novo pais
             }
             cb(true);
         });
