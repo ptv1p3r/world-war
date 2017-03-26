@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 require("./server/player");
-const secret = 'world@war';
+require("./server/countries");
+require("./server/gpspositions");
 var tools = require('./server/initServer');
+
+const secret = 'world@war';
 var serverDateStart, serverDateNow;
 var SOCKET_LIST = {}; // lista de ligacoes
 var playerCount = 0;
