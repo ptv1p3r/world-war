@@ -3,6 +3,7 @@ require("./server/player");
 require("./server/countries");
 require("./server/gpspositions");
 var tools = require('./server/initServer');
+var dateFormat = require('dateformat');
 
 const secret = 'world@war';
 var serverDateStart, serverDateNow;
@@ -165,8 +166,10 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('senChatMsgToServer',function (data) {
+        var timestamp = new Date();
+
         for (var i in SOCKET_LIST){
-            SOCKET_LIST[i].emit('addToChat', data.user + ': ' + data.msg);
+            SOCKET_LIST[i].emit('addToChat', dateFormat(timestamp,'yyyy-mm-dd HH:MM:ss') + ' ' + data.user + ': ' + data.msg);
         }
     });
 
