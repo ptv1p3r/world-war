@@ -378,7 +378,6 @@ var getGpsPositions = function(data,cb) {
     });
 };
 
-
 /**
  * Ciclo de loop
  */

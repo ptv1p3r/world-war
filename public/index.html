@@ -183,7 +183,6 @@
             earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
             createPlayerPositions(data);
         }
-
     });
 
 
@@ -219,8 +218,6 @@
 
         createGpsPositions();
 
-        //createPlayerPositions();
-
         createPlayer();
 
         createCountries();
@@ -255,7 +252,6 @@
     function createGpsPositions(){
         socket.on("gpsPositionsList", function (data) {
             gpsPositionsList = data.gpspoints;
-            //console.log(gpsPositionsList) ;
         });
     }
 
@@ -328,7 +324,7 @@
         var position;
 
         //var geom = new THREE.SphereGeometry(180,32,32);
-        var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
+        //var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
         var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
 
         for (var i= 0; i < playersList.player.length; i++){ // percorre todos os players
