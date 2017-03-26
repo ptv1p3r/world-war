@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+require("./server/player");
 const secret = 'world@war';
 var tools = require('./server/initServer');
 var serverDateStart, serverDateNow;
@@ -22,21 +23,6 @@ var db = new sqlite3.Database(file);
 // 60s  = 60 * 1000
 var CYCLE_TIME = 1000/25;      // tempo em milisegundos para cada ciclo de loop
 
-var GpsPositions = function (id,name,lat,lon,countryId) {
-    var self = {
-        id          : id,
-        name        : name,
-        lat         : lat,
-        lon         : lon,
-        countryid   : countryId
-    };
-    GpsPositions.list[id] = self;
-
-    return self;
-};
-
-GpsPositions.list = {};
-
 GpsPositions.update = function(){
     var pack = [];
     for(var i in GpsPositions.list){
@@ -52,18 +38,6 @@ GpsPositions.update = function(){
     return pack;
 };
 
-var Countries = function (id,name) {
-    var self = {
-        id      :  id,
-        name    :   name
-    };
-    Countries.list[id] = self;
-
-    return self;
-};
-
-Countries.list = {};
-
 Countries.update = function(){
     var pack = [];
     for(var i in Countries.list){
@@ -75,35 +49,6 @@ Countries.update = function(){
     }
     return pack;
 };
-
-/**
- * Classe para jogador
- * @param id
- * @param name
- * @returns {{name: *, id: *, number: string, x: number, y: number, local: number}}
- * @constructor
- */
-var Player = function (id) {
-    var self = {
-        id              : id    ,
-        name            : ''    ,
-        email           : ''    ,
-        password        : ''    ,
-        number          : 0     ,
-        x               : 0     ,
-        y               : 0     ,
-        user            : ''    ,
-        lastlogin       : 0.00  ,
-        countryid       : 0     ,
-        balance         : 0.00  ,
-        gpspositionsid  : 0
-    };
-    Player.list[id] = self;
-
-    return self;
-};
-
-Player.list = {};
 
 Player.onConnect = function(socket,data){
 

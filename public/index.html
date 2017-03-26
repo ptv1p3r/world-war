@@ -76,10 +76,9 @@
     <fieldset>
         <legend>Personal info:</legend>
         Name:  <div id="playerName"></div><br>
-        Country: <div id="playerEmail"></div><br>
-        Status: <div id="playerlocal"></div><br>
-        <button id="cityLights">City Lights</button>
-        <select id="countries"></select>
+        Country: <select id="countries"></select><br><br>
+        Current location: <div id="playerLocation"></div><br>
+        <button id="cityLights">City Lights</button><br>
     </fieldset>
 </div>
 
@@ -114,7 +113,7 @@
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
     var scene, renderer, camera, controls, cloudMesh, earthMesh, material, bolCityLightsON=false;
-    var playerLoggedIn = false, playersMesh, countryId, gpsPositionsList = {};
+    var playerLoggedIn = false, playersMesh, countryId, gpsPositionsList = {}, playerGpsLocationId;
 
     var socket = io(); // inicia conecao pelo socket
 
@@ -182,6 +181,7 @@
         if (earthMesh != undefined) {
             earthMesh.remove(earthMesh.getObjectByName('playersMesh'));
             createPlayerPositions(data);
+            document.getElementById('playerLocation').innerHTML = getPlayerLocation(playerGpsLocationId);
         }
     });
 
@@ -233,7 +233,7 @@
     }
 
     /**
-     * Metodo que é chamada a cada frame
+     * Metodo que é chamado a cada frame
      */
     function animate() {
         requestAnimationFrame(animate);
@@ -333,19 +333,18 @@
 
                 if(playersList.player[i].gpspositionsid == gpsPositionsList[g].id){ // relacao player ponto gps
                     position = latLongToVector3(gpsPositionsList[g].lat, gpsPositionsList[g].lon, 175);
+
+                    // cria o marcador
+                    var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
+
+                    // posiciona o marcador
+                    cube.position.set(position.x,position.y,position.z);
+                    cube.lookAt( new THREE.Vector3(0,0,0) );
+
+                    // merge dos marcadores com a mesh pai
+                    THREE.GeometryUtils.merge(geom,cube);
                 }
             }
-
-            // cria o marcador
-            var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
-
-            // posiciona o marcador
-            cube.position.set(position.x,position.y,position.z);
-            cube.lookAt( new THREE.Vector3(0,0,0) );
-
-            // merge dos marcadores com a mesh pai
-            THREE.GeometryUtils.merge(geom,cube);
-
         }
 
         playersMesh = new THREE.Mesh(geom,cubeMat); // cria player mesh
@@ -359,8 +358,18 @@
             document.getElementById('playerName').innerHTML = player.name;
             document.getElementById('playerBalance').innerHTML = player.balance;
             countryId = player.countryid;
+            playerGpsLocationId = player.gpspositionsid;
         });
 
+    }
+
+    function getPlayerLocation(playerGpsPoint){
+
+        for (var i=0; i < gpsPositionsList.length; i++) { // percorre todos os pontos
+            if(playerGpsPoint == gpsPositionsList[i].id){
+                return gpsPositionsList[i].name;
+            }
+        }
     }
 
     /**
