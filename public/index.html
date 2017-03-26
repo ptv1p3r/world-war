@@ -163,25 +163,7 @@
         earthMesh.material.needsUpdate = true;
     };
 
-    socket.on('addToChat',function(data){
-        pnlChatText.innerHTML += "<div>" + data + "</div>";
-    });
-
-    pnlChat.onmouseover = function () { // desligar os orbitcontrols no elemento html
-        controls.enabled =false;
-    };
-    pnlChat.onmouseout = function () { // ligar os orbitcontrols no elemento html
-        controls.enabled =true;
-    };
-
-    pnlChatForm.onsubmit = function (e) {
-        e.preventDefault(); // para nao fazer refresh da pagina com o enter
-        socket.emit('senChatMsgToServer',{
-            user : playerUser,
-            msg  : pnlChatInput.value
-        });
-        pnlChatInput.value = '';
-    };
+    initChat();
 
     socket.on('signInResponse',function(data){
         if(data.success){
@@ -283,6 +265,32 @@
             render();
         }
 
+    }
+
+    /**
+     * Metodo de inicializacao do Chat
+     */
+    function initChat(){
+        socket.on('addToChat',function(data){ // Recebe do servidor mensagem
+            pnlChatText.innerHTML += "<div>" + data + "</div>";
+        });
+
+        pnlChat.onmouseover = function () { // desligar os orbitcontrols no elemento html
+            controls.enabled =false;
+        };
+
+        pnlChat.onmouseout = function () { // ligar os orbitcontrols no elemento html
+            controls.enabled =true;
+        };
+
+        pnlChatForm.onsubmit = function (e) { // evento de envio para o servidor
+            e.preventDefault(); // para nao fazer refresh da pagina com o enter
+            socket.emit('senChatMsgToServer',{ // envia para o servidor
+                user : playerUser,
+                msg  : pnlChatInput.value
+            });
+            pnlChatInput.value = ''; // limpa no final
+        };
     }
 
     function createGpsPositions(){
