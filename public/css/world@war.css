@@ -36,6 +36,7 @@ a {color: #00B7FF;}
     bottom:0px;
     width: 100%;
     color: darkgrey;
+    background: rgba(0, 0, 0, 0.9);
     /*    white-space:nowrap;*/
 }
 
@@ -85,6 +86,7 @@ a {color: #00B7FF;}
     height: 100%;
     color: darkgrey;
     overflow-y: auto;
+    font-size: small;
     background: rgba(0, 0, 0, 0.7);
 }
 
