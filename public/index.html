@@ -331,31 +331,31 @@
         var cubeMat = new THREE.MeshLambertMaterial({color: 0x000000,opacity:0.6, emissive:0xffffff});
         var cubeMat = new THREE.MeshLambertMaterial({color: "red",opacity:0.6});
 
-        for (var i= 0; i < playersList.player.length; i++){
+        for (var i= 0; i < playersList.player.length; i++){ // percorre todos os players
 
-            for (var g=0; g < gpsPositionsList.length; g++) {
+            for (var g=0; g < gpsPositionsList.length; g++) { // percorre todos os pontos
 
-                if(playersList.player[i].gpspositionsid == gpsPositionsList[g].id){
+                if(playersList.player[i].gpspositionsid == gpsPositionsList[g].id){ // relacao player ponto gps
                     position = latLongToVector3(gpsPositionsList[g].lat, gpsPositionsList[g].lon, 175);
                 }
             }
 
-            // create the cube
+            // cria o marcador
             var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
 
-            // position the cube correctly
+            // posiciona o marcador
             cube.position.set(position.x,position.y,position.z);
             cube.lookAt( new THREE.Vector3(0,0,0) );
 
-            // merge with main model
+            // merge dos marcadores com a mesh pai
             THREE.GeometryUtils.merge(geom,cube);
 
         }
 
-        playersMesh = new THREE.Mesh(geom,cubeMat);
+        playersMesh = new THREE.Mesh(geom,cubeMat); // cria player mesh
         playersMesh.name = 'playersMesh';
 
-        earthMesh.add(playersMesh);
+        earthMesh.add(playersMesh); // adiciona a mesh player à mesh terra
     }
 
     function createPlayer(){
