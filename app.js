@@ -164,6 +164,12 @@ io.sockets.on('connection', function (socket) {
         });
     });
 
+    socket.on('senChatMsgToServer',function (data) {
+        for (var i in SOCKET_LIST){
+            SOCKET_LIST[i].emit('addToChat', data.user + ': ' + data.msg);
+        }
+    });
+
     /**
      * Metodo automatico que valida o disconect do socket pelo cliente
      */

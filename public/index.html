@@ -82,6 +82,15 @@
     </fieldset>
 </div>
 
+<div id="pnlChat" style="display: none">
+    <div id="Chat-Text">
+        <div>Welcome to World@War</div>
+    </div>
+    <form id="Chat-Form">
+        <input id="Chat-Input" type="text">
+    </form>
+</div>
+
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script src="js/three.js"></script>
 <script src="js/date.format.js"></script>
@@ -101,6 +110,11 @@
     var signDivSignUp = document.getElementById('signDiv-signUp');
     var signDivPassword = document.getElementById('signDiv-password');
 
+    var pnlChat = document.getElementById('pnlChat');
+    var pnlChatText = document.getElementById('Chat-Text');
+    var pnlChatForm = document.getElementById('Chat-Form');
+    var pnlChatInput= document.getElementById('Chat-Input');
+
     var WIDTH = window.innerWidth,
         HEIGHT = window.innerHeight,
         VIEW_ANGLE = 45,
@@ -113,7 +127,7 @@
         NUVENS_ROTACAO_VELOCIDADE = -0.00001;
 
     var scene, renderer, camera, controls, cloudMesh, earthMesh, material, bolCityLightsON=false;
-    var playerLoggedIn = false, playersMesh, countryId, gpsPositionsList = {}, playerGpsLocationId;
+    var playerLoggedIn = false, playersMesh, countryId, gpsPositionsList = {}, playerGpsLocationId, playerUser;
 
     var socket = io(); // inicia conecao pelo socket
 
@@ -148,6 +162,26 @@
         earthMesh.material.needsUpdate = true;
     };
 
+    socket.on('addToChat',function(data){
+        pnlChatText.innerHTML += "<div>" + data + "</div>";
+    });
+
+    pnlChat.onmouseover = function () { // desligar os orbitcontrols no elemento html
+        controls.enabled =false;
+    };
+    pnlChat.onmouseout = function () { // ligar os orbitcontrols no elemento html
+        controls.enabled =true;
+    };
+
+    pnlChatForm.onsubmit = function (e) {
+        e.preventDefault(); // para nao fazer refresh da pagina com o enter
+        socket.emit('senChatMsgToServer',{
+            user : playerUser,
+            msg  : pnlChatInput.value
+        });
+        pnlChatInput.value = '';
+    };
+
     socket.on('signInResponse',function(data){
         if(data.success){
             playerLoggedIn = true;
@@ -156,6 +190,7 @@
             gameDiv.style.display = 'block';
             myCanvas.style.display = 'block';
             pnlPlayerInfo.style.display = 'block';
+            pnlChat.style.display = 'block';
 
             init();
 
@@ -359,6 +394,7 @@
             document.getElementById('playerBalance').innerHTML = player.balance;
             countryId = player.countryid;
             playerGpsLocationId = player.gpspositionsid;
+            playerUser = player.user;
         });
 
     }

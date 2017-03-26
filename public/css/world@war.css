@@ -65,3 +65,22 @@ a {color: #00B7FF;}
 
     margin: auto;
 }
+
+#pnlChat {
+    bottom:100px;
+    margin-left: 10px;
+    position: absolute;
+    width: 500px;
+    height: 100px;
+}
+
+#Chat-Text {
+    width: 100%;
+    height: 100%;
+    color: darkgrey;
+    overflow-y: scroll;
+}
+
+#Chat-Input {
+    width: 500px;
+}
