@@ -66,7 +66,8 @@
         Name:  <div id="playerName"></div><br>
         Country: <select id="countries"></select><br><br>
         Current location: <div id="playerLocation"></div><br>
-        <button id="cityLights">City Lights</button><br>
+        <button id="cityLights">City Lights</button><div></div><br>
+        <button id="nextScene">Next Scene</button><br>
     </fieldset>
 </div>
 
@@ -94,6 +95,7 @@
     var myCanvas = document.getElementById('myCanvas');
     var btnLogout = document.getElementById('logOut');
     var btnCityLights = document.getElementById('cityLights');
+    var btnNextScene = document.getElementById('nextScene');
     var signDivUsername = document.getElementById('signDiv-username');
     var signDivSignIn = document.getElementById('signDiv-signIn');
     var signDivSignUp = document.getElementById('signDiv-signUp');
@@ -521,7 +523,7 @@
         var z = (radius+heigth) * Math.cos(phi) * Math.sin(theta);*/
 
         var phi   = (90-lat)*(Math.PI/180);
-        var theta = (lon+180)*(Math.PI/180);
+        var theta = (lon-180)*(Math.PI/180);
         var x = -((radius ) * Math.sin(phi)*Math.cos(theta));
         var z = ((radius ) * Math.sin(phi)*Math.sin(theta));
         var y = ((radius ) * Math.cos(phi));
