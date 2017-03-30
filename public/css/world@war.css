@@ -72,7 +72,7 @@ a {color: #00B7FF;}
     bottom:100px;
     margin-left: 10px;
     position: absolute;
-    width: 500px;
+    width: 350px;
     height: 100px;
 }
 
@@ -91,5 +91,5 @@ a {color: #00B7FF;}
 }
 
 #Chat-Input {
-    width: 496px;
+    width: 346px;
 }
