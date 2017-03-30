@@ -380,7 +380,8 @@
                     position = latLongToVector3(gpsPositionsList[g].lat, gpsPositionsList[g].lon, 175);
 
                     // cria o marcador
-                    var cube = new THREE.Mesh(new THREE.CubeGeometry(5,5,1+300/8,1,1,1,cubeMat));
+                    //var cube = new THREE.Mesh(new THREE.CubeGeometry(2,2,1,1,1,1,cubeMat));
+                    var cube = new THREE.Mesh(new THREE.TorusGeometry(10, 3, 16, 100));
 
                     // posiciona o marcador
                     cube.position.set(position.x,position.y,position.z);
